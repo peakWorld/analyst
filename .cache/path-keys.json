@@ -1,0 +1,20 @@
+{
+  "keys": [
+    "contexts",
+    "state",
+    "opts",
+    "_traverseFlags",
+    "skipKeys",
+    "parentPath",
+    "container",
+    "listKey",
+    "key",
+    "node",
+    "type",
+    "parent",
+    "hub",
+    "data",
+    "context",
+    "scope"
+  ]
+}
