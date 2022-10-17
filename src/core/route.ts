@@ -1,8 +1,8 @@
 import fs from 'fs'
 import path from 'path'
-import * as babel from "@babel/core";
+import * as babel from '@babel/core';
 import traverse from '@babel/traverse'
-import * as t from "@babel/types";
+import * as t from '@babel/types';
 import * as config from '../config.js'
 import { getAbsFilePath } from '../utils/file.js'
 // import { saveToCache } from '../utils/cache.js'
@@ -53,7 +53,7 @@ export function getVisitor (tick?: Tick) {
 
 export default () => {
   const data = fs.readFileSync(config.ROUTE_PATH)
-  let entry_str = data.toString();
+  const entry_str = data.toString();
   const ast = babel.parseSync(entry_str, config.AST_CONFIG as babel.TransformOptions)
   traverse.default(ast, getVisitor())
   return routes

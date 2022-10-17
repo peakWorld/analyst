@@ -2,9 +2,9 @@ import * as config from './config.js'
 
 import fs from 'fs'
 import path2 from 'path'
-import * as babel from "@babel/core";
+import * as babel from '@babel/core';
 import traverse from '@babel/traverse'
-import * as t from "@babel/types";
+import * as t from '@babel/types';
 // import generator from '@babel/generator'
 // import template from "@babel/template";
 import compiler from 'vue-template-compiler'
