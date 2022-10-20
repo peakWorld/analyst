@@ -1,6 +1,6 @@
-import fs from 'fs'
+import fs from 'fs';
 
-let cache = []
+let cache = [];
 export function doCircular(data: Record<string, any>) {
   const str = JSON.stringify(data, (_, value) => {
     if (typeof value === 'object' && value !== null) {
@@ -9,11 +9,11 @@ export function doCircular(data: Record<string, any>) {
     }
     return value;
   });
-  cache = []
-  return str
+  cache = [];
+  return str;
 }
 
 export function saveToCache(path: string, data: Record<string, any>) {
-  const str = typeof data === 'string' ? data : doCircular(data)
-  fs.writeFileSync(`.cache/${path}`, str)
+  const str = typeof data === 'string' ? data : doCircular(data);
+  fs.writeFileSync(`.cache/${path}`, str);
 }
