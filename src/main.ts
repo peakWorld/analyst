@@ -12,10 +12,13 @@ import { getAbsFilePath, checkFileSuffix } from './utils/file.js';
 import getRoute, { getVisitor } from './core/route.js';
 import { saveToCache } from './utils/cache.js';
 
-const usedFiles = new Set<string>(); // 在使用中文件
+// 在使用中文件
+const usedFiles = new Set<string>();
 const routes = getRoute(); // 路由映射
-const map = new Map<string, Set<string>>(); // 文件间的加载关系, 树形
-const appear = new Set<string>(); // 满足查询条件的文件
+// 文件间的加载关系, 树形
+const relations = new Map<string, Set<string>>();
+// 满足查询条件的文件
+const appears = new Set<string>();
 
 function getDependanceList(entry: string) {
   const data = fs.readFileSync(entry);
@@ -36,13 +39,11 @@ function getDependanceList(entry: string) {
     config.AST_CONFIG as babel.TransformOptions,
   );
   const dirPath = path2.dirname(entry);
-
-  let set = map.get(entry);
+  let set = relations.get(entry);
   if (!set) {
     set = new Set();
-    map.set(entry, set);
+    relations.set(entry, set);
   }
-
   let visitor: babel.Visitor = {
     ImportDeclaration(path) {
       const { value } = path.node.source;
@@ -58,16 +59,27 @@ function getDependanceList(entry: string) {
         }
       }
     },
+    // ObjectProperty(path) {
+    //   const { node } = path;
+    //   if (t.isIdentifier(node.key) && node.key.name === 'url') {
+    //     saveToCache(`node.json`, node);
+    //     path.traverse({
+    //       StringLiteral(path) {
+    //         const { value } = path.node;
+    //         if (
+    //           /.*\/contact\/get(Risk)?Excel$/.test(value) ||
+    //           /\/file\//.test(value)
+    //         ) {
+    //           appears.add(entry);
+    //         }
+    //       },
+    //     });
+    //   }
+    // },
     Identifier(path) {
-      if (
-        t.isIdentifier(path.node, { name: 'areaCodeArr' }) ||
-        t.isIdentifier(path.node, { name: 'CommunitySelect' })
-      ) {
-        appear.add(entry);
+      if (t.isIdentifier(path.node, { name: 'areaCodeArr' })) {
+        appears.add(entry);
       }
-      // if (t.isIdentifier(path.node, { name: 'getAddrSuggestions' })) {
-      //   appear.add(entry)
-      // }
     },
   };
   if (entry === config.ROUTE_PATH) {
@@ -85,11 +97,10 @@ function getDependanceList(entry: string) {
   }
   traverse.default(ast, visitor);
 }
-
 getDependanceList(config.ENTRY_PATH);
 
-// saveToCache(`routes.json`, [...routes.keys()])
-// saveToCache('appear.json', [...appear])
+// saveToCache(`routes.json`, [...routes.values()]);
+saveToCache('appears.json', [...appears]);
 // saveToCache('map.json', [...map.keys()].reduce((res, k) => {
 //   const v = map.get(k)
 //   if (v && v.size) {
@@ -98,7 +109,8 @@ getDependanceList(config.ENTRY_PATH);
 //   return res
 // }, {}))
 
-const res = new Set();
+const res = {};
+// 树的广度优先搜索
 (() => {
   function checkFile(file: string) {
     let used = new Set();
@@ -110,10 +122,10 @@ const res = new Set();
         continue;
       }
       used.add(tmp);
-      if (appear.has(tmp)) {
+      if (appears.has(tmp)) {
         return true;
       }
-      const fileSet = map.get(tmp);
+      const fileSet = relations.get(tmp);
       if (fileSet && fileSet.size) {
         stack = [...new Set([...stack, ...fileSet])];
       }
@@ -124,9 +136,8 @@ const res = new Set();
   routes.forEach((route, file) => {
     const checked = checkFile(file);
     if (checked) {
-      res.add(route);
+      res[route] = file;
     }
   });
 })();
-
-saveToCache('res.json', [...res]);
+saveToCache('res.json', res);
