@@ -20,11 +20,20 @@ const relations = new Map<string, Set<string>>();
 // 满足查询条件的文件
 const appears = new Set<string>();
 
+const findText = '发现方式';
+
 function getDependanceList(entry: string) {
   const data = fs.readFileSync(entry);
   let entry_str = data.toString();
   if (entry.endsWith('vue')) {
-    const { script } = compiler.parseComponent(entry_str);
+    const result = compiler.parseComponent(entry_str);
+    const { script, template } = result;
+
+    if (template?.content?.includes(findText)) {
+      console.log('findText', findText);
+      appears.add(entry);
+    }
+
     if (script && script.content) {
       entry_str = script.content.trim();
     } else {
@@ -59,28 +68,28 @@ function getDependanceList(entry: string) {
         }
       }
     },
-    // ObjectProperty(path) {
-    //   const { node } = path;
-    //   if (t.isIdentifier(node.key) && node.key.name === 'url') {
-    //     saveToCache(`node.json`, node);
-    //     path.traverse({
-    //       StringLiteral(path) {
-    //         const { value } = path.node;
-    //         if (
-    //           /.*\/contact\/get(Risk)?Excel$/.test(value) ||
-    //           /\/file\//.test(value)
-    //         ) {
-    //           appears.add(entry);
-    //         }
-    //       },
-    //     });
-    //   }
-    // },
-    Identifier(path) {
-      if (t.isIdentifier(path.node, { name: 'areaCodeArr' })) {
-        appears.add(entry);
+    ObjectProperty(path) {
+      const { node } = path;
+      if (t.isIdentifier(node.key) && node.key.name === 'message') {
+        saveToCache(`node.json`, node);
+        path.traverse({
+          StringLiteral(path) {
+            const { value } = path.node;
+            if (
+              /.*\/contact\/get(Risk)?Excel$/.test(value) ||
+              /\/file\//.test(value)
+            ) {
+              appears.add(entry);
+            }
+          },
+        });
       }
     },
+    // Identifier(path) {
+    //   if (t.isIdentifier(path.node, { name: 'xxxxxxxxxx' })) {
+    //     appears.add(entry);
+    //   }
+    // },
   };
   if (entry === config.ROUTE_PATH) {
     // 路由处理
