@@ -3,8 +3,8 @@ import path from 'path';
 import * as babel from '@babel/core';
 import traverse from '@babel/traverse';
 import * as t from '@babel/types';
-import * as config from '../config.js';
-import { getAbsFilePath } from '../utils/file.js';
+import * as config from './config.js';
+import { getAbsFilePath } from './file.js';
 // import { saveToCache } from '../utils/cache.js'
 
 const routes = new Map<string, string>();

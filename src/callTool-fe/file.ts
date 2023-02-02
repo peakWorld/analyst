@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import * as config from '../config.js';
+import * as config from './config.js';
 
 export function getAbsFilePath(dirPath: string, filePath: string) {
   let absPath = '';

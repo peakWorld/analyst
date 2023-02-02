@@ -1,7 +1,8 @@
-import dotenv from 'dotenv';
-dotenv.config();
+// import dotenv from 'dotenv';
+// dotenv.config();
 
-export const SRC_PATH = process.env.PROJECT + '/src';
+const PROJECT = '/Users/windlliu/wk/CallTool-FE';
+export const SRC_PATH = PROJECT + '/src';
 export const ENTRY_PATH = SRC_PATH + '/main.js';
 export const ROUTE_PATH = SRC_PATH + '/router/index.js';
 
