@@ -122,7 +122,7 @@ const res = {};
 // 树的广度优先搜索
 (() => {
   function checkFile(file: string) {
-    let used = new Set();
+    const used = new Set();
     let stack = [file];
     while (stack.length) {
       const tmp = stack.shift();
