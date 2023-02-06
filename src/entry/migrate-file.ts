@@ -22,3 +22,16 @@
 // tencent-pacs-webview scss 'aimis-pacs-static-new'
 // tencent-pacs-wxwork scss 'aimis-pacs-static-new'
 // tencent-pacs-mobile scss 'aimis-pacs-static-web'
+
+import type {CommandOptions} from '../interfaces/migrate-file.js'
+import { defaultOptions } from '../consts/migrate-file.js'
+
+// 处理命令行输入的参数
+export default function setup(options: CommandOptions) {
+  console.log('执行命令 sable assets')
+
+  const currentOptions = {
+    ...defaultOptions,
+  }
+  console.log('options', options, currentOptions);
+}
