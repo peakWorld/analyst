@@ -1,12 +1,10 @@
-import { Options } from '../interfaces/migrate-file.js'
-import { getCwd } from '../utils/system.js'
+import { Options } from '../interfaces/migrate-file.js';
 
-export const defaultOptions: Options = {
+export const defaultOptions: Partial<Options> = {
   alias: ['@assets', '@img'],
   isVue: true,
   useVite: false,
   migrateImage: false,
   migrateStyle: true,
   stylePreprocess: 'less',
-  cwd: getCwd()
-}
+};

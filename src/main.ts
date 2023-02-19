@@ -4,32 +4,35 @@
  */
 import { Command } from 'commander';
 import migrateFileSetup from './entry/migrate-file.js';
-import SableLog from './utils/log.js'
-import { isNotCommand } from './utils/system.js'
+import { SableLog, isNotCommand } from './utils/index.js';
 
 (() => {
-  // 非命令行模式入口
-  if (isNotCommand) {
-    migrateFileSetup({ debug: true, config: 'acb.json'});
-    return
+  try {
+    // 非命令行模式入口
+    if (isNotCommand) {
+      migrateFileSetup({ configPath: 'acb.json'});
+      return;
+    }
+    const program = new Command();
+    // 初始化日志输出
+    // SableLog.setUp()
+
+    // 迁移项目中用到的子项目中的静态资源
+    program
+      .command('assets')
+      .description('迁移子项目中的静态资源')
+      .version('0.0.1', '-v, --version')
+      .option('-x, --configPath <configPath>', '通过配置文件使用工具', (configPath) => configPath)
+      .action((options) => {
+        new SableLog('sable:assets');
+        migrateFileSetup(options);
+      });
+
+    program.parse(process.argv);
+  } catch (err) {
+    console.log(err);
   }
-  const program = new Command();
-  // 初始化日志输出
-  SableLog.setUp()
-
-  // 迁移项目中用到的子项目中的静态资源
-  program
-    .command('assets')
-    .description('迁移子项目中的静态资源')
-    .version('0.0.1', '-v, --version')
-    .option('-x, --config <configPath>', '通过配置文件使用工具', (configPath) => configPath)
-    .option('-d, --debug', '输出工具内部日志')
-    .action((options) => {
-      migrateFileSetup(options);
-    })
-
-  program.parse(process.argv);
-})()
+})();
 
 // demo
 // program

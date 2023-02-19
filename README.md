@@ -6,3 +6,6 @@
 
 ## 链接命令行
 * 执行`sudo npm link`
+
+## 命令行执行输出开发日志
+* `DEBUG=* sable assets -x 'acb.json'`

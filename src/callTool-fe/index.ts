@@ -10,7 +10,7 @@ import * as t from '@babel/types';
 import compiler from 'vue-template-compiler';
 import { getAbsFilePath, checkFileSuffix } from './file.js';
 import getRoute, { getVisitor } from './route.js';
-import { saveToCache } from '../utils/cache.js';
+import { saveToCache } from '../utils/index.js';
 
 // 在使用中文件
 const usedFiles = new Set<string>();
