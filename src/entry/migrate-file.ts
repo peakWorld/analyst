@@ -23,9 +23,12 @@
 // tencent-pacs-wxwork scss 'aimis-pacs-static-new'
 // tencent-pacs-mobile scss 'aimis-pacs-static-web'
 
+// 测试
+// sable assets -x /Users/windlliu/twk/analyst/.demo/test1.json
+
 import type {CommandOptions, Options} from '../interfaces/migrate-file.js';
 import { defaultOptions } from '../consts/migrate-file.js';
-import { getConfigsByFile } from '../utils/index.js';
+import { getOptionsByFile } from '../utils/index.js';
 import Main from '../migrate-file/index.js';
 
 // 处理命令行输入的参数
@@ -36,7 +39,7 @@ export default function setup(commandOptions: CommandOptions) {
   // 命令行配置
   const options = {
     ...defaultOptions,
-    ...getConfigsByFile<Options>(configPath),
+    ...getOptionsByFile<Options>(configPath),
   };
 
   // 初始化功能

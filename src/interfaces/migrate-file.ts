@@ -11,13 +11,11 @@ export interface AliasItem {
 
 // 命令行相关配置
 export interface Options {
+  base: string
   alias: Array<string | AliasItem>
-  isVue: boolean
-  useVite: boolean
-  migrateImage: boolean // 迁移图片
-  migrateStyle: boolean // 迁移样式
+  isVue: boolean // vue | react
+  buildUri: string  // 项目编译配置路径(文件|文件夹)
   stylePreprocess: 'less' | 'scss' // 样式预解析器
-
 }
 
 export interface Configs {

@@ -1,8 +1,4 @@
 {
-  "alias": [
-    "@assets",
-    "@img"
-  ],
   "isVue": true,
   "useVite": false,
   "migrateImage": false,
