@@ -1,4 +1,3 @@
-import fs from 'fs';
 import { isObject } from './type.js';
 
 // 处理循环引用对象
@@ -13,9 +12,4 @@ export function stringifyWithCircular(obj: Record<string, any>) {
   });
   cache = [];
   return str;
-}
-
-export function saveToCache(path: string, data: Record<string, any>) {
-  const str = typeof data === 'string' ? data : stringifyWithCircular(data);
-  fs.writeFileSync(`.cache/${path}`, str);
 }

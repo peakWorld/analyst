@@ -10,7 +10,6 @@ import * as t from '@babel/types';
 import compiler from 'vue-template-compiler';
 import { getAbsFilePath, checkFileSuffix } from './file.js';
 import getRoute, { getVisitor } from './route.js';
-import { saveToCache } from '../utils/index.js';
 
 // 在使用中文件
 const usedFiles = new Set<string>();
@@ -71,7 +70,6 @@ function getDependanceList(entry: string) {
     ObjectProperty(path) {
       const { node } = path;
       if (t.isIdentifier(node.key) && node.key.name === 'message') {
-        saveToCache(`node.json`, node);
         path.traverse({
           StringLiteral(path) {
             const { value } = path.node;
@@ -108,16 +106,6 @@ function getDependanceList(entry: string) {
 }
 getDependanceList(config.ENTRY_PATH);
 
-// saveToCache(`routes.json`, [...routes.values()]);
-saveToCache('appears.json', [...appears]);
-// saveToCache('map.json', [...map.keys()].reduce((res, k) => {
-//   const v = map.get(k)
-//   if (v && v.size) {
-//     res[k] =  [...v]
-//   }
-//   return res
-// }, {}))
-
 const res = {};
 // 树的广度优先搜索
 (() => {
@@ -149,4 +137,3 @@ const res = {};
     }
   });
 })();
-saveToCache('res.json', res);

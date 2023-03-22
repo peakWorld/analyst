@@ -20,7 +20,8 @@
     "noImplicitAny": false,
     "noImplicitThis": false,
     "strictNullChecks": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   },
   "include": [
     "src/**/*",
