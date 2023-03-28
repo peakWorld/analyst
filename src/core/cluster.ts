@@ -10,7 +10,7 @@ export interface IpcMessage {
   wid?: string;
 }
 
-export interface Worker {
+export interface IWorker {
   inited: boolean;
   pid: number;
   wid: string;
@@ -37,7 +37,7 @@ class Cluster {
 
   protected disconnectByUser = false;
 
-  protected workers: Record<string, Worker> = {};
+  protected iWorkers: Record<string, IWorker> = {};
 
   constructor() {
     this.maxSize = cpus().length;
@@ -72,7 +72,7 @@ class Cluster {
   // 根据索引获取子进程实例
   protected getWorkerByIndexM(index: number) {
     if (index > this.maxSize || index < 0) return null;
-    const wid = Object.keys(this.workers)[index];
+    const wid = Object.keys(this.iWorkers)[index];
     return this.getWorkerByWidM(wid);
   }
 
@@ -84,27 +84,27 @@ class Cluster {
 
   // 获取当前可用的进程
   protected getCanUseWorkers() {
-    if (!Object.keys(this.workers).length) return [];
-    const tmpWids = Object.keys(this.workers).filter((wid) => {
-      const worker = this.workers[wid];
-      return worker.inited && !worker.using; // 初始化通信后、且未在使用中
+    if (!Object.keys(this.iWorkers).length) return [];
+    const tmpWids = Object.keys(this.iWorkers).filter((wid) => {
+      const iWorker = this.iWorkers[wid];
+      return iWorker.inited && !iWorker.using; // 初始化通信后、且未在使用中
     });
     if (!tmpWids.length) return [];
-    return tmpWids.map((wid) => this.workers[wid]);
+    return tmpWids.map((wid) => this.iWorkers[wid]);
   }
 
   // 退出进程后, 需要做的状态处理
   protected afterExitWkM(worker: NWorker) {
-    for (const wid in this.workers) {
-      const wstatus = this.workers[wid];
+    for (const wid in this.iWorkers) {
+      const wstatus = this.iWorkers[wid];
       if (wstatus.pid === worker.process.pid) {
-        delete this.workers[wid];
+        delete this.iWorkers[wid];
       }
     }
   }
 
-  protected setWkstatus(wid: string, status: Partial<Worker> = {}) {
-    this.workers[wid] = { ...this.workers[wid], ...status };
+  protected setWkstatusM(wid: string, status: Partial<IWorker> = {}) {
+    this.iWorkers[wid] = { ...this.iWorkers[wid], ...status };
   }
 
   // 新建进程
@@ -126,7 +126,7 @@ class Cluster {
     if (type === IPCTYPE.INIT) {
       const wid = this.getWkIdByPidM(pid);
       if (!wid) return;
-      this.workers[wid] = { inited: true, using: false, pid, wid };
+      this.iWorkers[wid] = { inited: true, using: false, pid, wid };
     } else if (type == IPCTYPE.MSG) {
       this.MSGM && this.MSGM(msg);
     }

@@ -62,13 +62,13 @@ export default class Main extends Cluster {
       }
       await this.setupM(); // 初始化子进程
       try {
-        const workers = this.getCanUseWorkers();
+        const iWorkers = this.getCanUseWorkers();
         const dataList = this.splitData(stashIds);
         for (let i = 0, len = dataList.length; i < len; i++) {
           const stashIds = dataList[i];
-          const { wid, pid } = workers[i];
+          const { wid, pid } = iWorkers[i];
           const worker = this.getWorkerByWidM(wid);
-          this.setWkstatus(wid, { using: true });
+          this.setWkstatusM(wid, { using: true });
           worker.send({ wid, pid, type: IPCTYPE.MSG, stashIds });
         }
         // 主进程检测任务完成
@@ -95,7 +95,7 @@ export default class Main extends Cluster {
     if (successIds.length) {
       this.searchStashId = [...this.searchStashId, ...successIds];
     }
-    this.setWkstatus(wid, { using: false });
+    this.setWkstatusM(wid, { using: false });
   }
 
   // 子进程消息处理
