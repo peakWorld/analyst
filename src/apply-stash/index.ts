@@ -77,6 +77,7 @@ export default class Main extends Cluster {
         console.log('stashIds =>', this.searchStashId);
         this.disconnectM();
       } catch (err) {
+        this.disconnectM();
         console.log('setup err', err);
       }
     } else {

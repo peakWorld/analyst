@@ -43,7 +43,6 @@ import { SableLog, isNotCommand } from './utils/index.js';
       .action((options) => {
         new SableLog('sable:stash');
         applyStashSetup(options);
-        // console.log('options', options);
       });
 
     program.parse(process.argv);
