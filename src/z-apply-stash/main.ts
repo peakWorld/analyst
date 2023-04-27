@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process';
-import Cluster, { IPCTYPE, type IpcMessage } from '../core/cluster.js';
-import type { Options } from '../interfaces/apply-stash.js';
+import Cluster, { IPCTYPE, type IpcMessage } from './cluster.js';
+import type { Options } from './interface.js';
 
 interface MessageW extends IpcMessage {
   stashIds: string[];

@@ -1,7 +1,8 @@
 /**
  * TODO
  * 1. 迁移子模块中的样式文件、图片等
- * 2. 增量更新
+ * 2. 清除文件内的未使用的方法、参数等
+ * 3. 增量更新
  */
 
 // 注意
@@ -26,10 +27,10 @@
 // 测试
 // sable assets -x /Users/windlliu/twk/analyst/.demo/test1.json
 
-import type {CommandOptions, Options} from '../interfaces/migrate-file.js';
-import { defaultOptions } from '../consts/migrate-file.js';
+import type { CommandOptions, Options } from './interface.js';
+import { defaultOptions } from './const.js';
 import { getOptionsByFile } from '../utils/index.js';
-import Main from '../migrate-file/index.js';
+import Main from './main.js';
 
 // 处理命令行输入的参数
 export default function setup(commandOptions: CommandOptions) {

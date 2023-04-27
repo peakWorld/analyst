@@ -5,8 +5,9 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '/Users/windlliu/twk/analyst/.env' });
 import { Command } from 'commander';
-import migrateFileSetup from './entry/migrate-file.js';
-import applyStashSetup from './entry/apply-stash.js';
+import migrateFileSetup from './z-migrate-file/index.js';
+import applyStashSetup from './z-apply-stash/index.js';
+import rmTrashSetup from './z-rm-trash/index.js';
 import { SableLog, isNotCommand } from './utils/index.js';
 
 (() => {
@@ -14,7 +15,9 @@ import { SableLog, isNotCommand } from './utils/index.js';
     // 非命令行模式入口
     if (isNotCommand) {
       new SableLog('sable:assets');
-      migrateFileSetup({ configPath: 'acb.json' });
+      rmTrashSetup({
+        entryPath: '/Users/windlliu/wk/tencent-pacs-frontend/src/main.ts',
+      });
       return;
     }
     const program = new Command();
@@ -22,7 +25,7 @@ import { SableLog, isNotCommand } from './utils/index.js';
     // C1: 迁移项目中用到的子项目中的静态资源
     program
       .command('assets')
-      .description('迁移子项目中的静态资源')
+      .description('')
       .version('0.0.1', '-v, --version')
       .option(
         '-x, --configPath <configPath>',
@@ -43,6 +46,17 @@ import { SableLog, isNotCommand } from './utils/index.js';
       .action((options) => {
         new SableLog('sable:stash');
         applyStashSetup(options);
+      });
+
+    // C3: 删除项目无用文件
+    program
+      .command('trash')
+      .description('删除项目中无用文件')
+      .version('0.0.1', '-v, --version')
+      .option('-e, --entryPath <text>', '项目入口')
+      .action((options) => {
+        new SableLog('sable:trash');
+        rmTrashSetup(options);
       });
 
     program.parse(process.argv);

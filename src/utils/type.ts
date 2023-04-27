@@ -1,14 +1,20 @@
-
 export function checkType(data: unknown) {
   return Object.prototype.toString.call(data).slice(8, -1).toLowerCase();
 }
 
-export function isObject(data: unknown) {
+export function isObject(data: unknown): data is Record<string, any> {
   return ['object'].includes(checkType(data));
 }
 
 export function isBasicType(data: unknown) {
-  return ['null', 'undefined', 'string', 'number', 'boolean', 'symbol'].includes(checkType(data));
+  return [
+    'null',
+    'undefined',
+    'string',
+    'number',
+    'boolean',
+    'symbol',
+  ].includes(checkType(data));
 }
 
 export function isNumber(data: unknown) {

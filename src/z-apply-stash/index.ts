@@ -4,8 +4,8 @@
  *
  * DEBUG=* sable stash -s 'vite'
  */
-import { CommandOptions } from '../interfaces/apply-stash.js';
-import Main from '../apply-stash/index.js';
+import { CommandOptions } from './interface.js';
+import Main from './main.js';
 
 export default function setup(commandOptions: CommandOptions) {
   console.vlog('执行命令 sable stash');
