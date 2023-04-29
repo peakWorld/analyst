@@ -3,7 +3,7 @@
  * 命令行相关
  */
 import dotenv from 'dotenv';
-dotenv.config({ path: '/Users/windlliu/twk/analyst/.env' });
+dotenv.config();
 import { Command } from 'commander';
 import migrateFileSetup from './z-migrate-file/index.js';
 import applyStashSetup from './z-apply-stash/index.js';

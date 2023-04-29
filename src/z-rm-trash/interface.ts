@@ -4,4 +4,7 @@ export interface CommandOptions {
 
 export interface Options {
   entry: string;
+  deps: string[];
+  aliasMap: Record<string, string>;
+  alias: string[];
 }

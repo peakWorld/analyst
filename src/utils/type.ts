@@ -17,7 +17,7 @@ export function isBasicType(data: unknown) {
   ].includes(checkType(data));
 }
 
-export function isNumber(data: unknown) {
+export function isNumber(data: unknown): data is number {
   return ['number'].includes(checkType(data));
 }
 

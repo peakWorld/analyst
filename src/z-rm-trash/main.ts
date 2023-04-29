@@ -5,6 +5,6 @@ import { Options } from './interface.js';
 
 export default class Main {
   constructor(private options: Options) {
-    console.log('trash', this.options);
+    console.log('Main trash', this.options);
   }
 }
