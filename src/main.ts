@@ -16,7 +16,8 @@ import { SableLog, isNotCommand } from './utils/index.js';
     if (isNotCommand) {
       new SableLog('sable:assets');
       rmTrashSetup({
-        entryPath: '/Users/windlliu/wk/tencent-pacs-frontend/src/main.ts',
+        entry:
+          '/Users/windlliu/twk/analyst/.cache/tencent-pacs-frontend/.trash.ts',
       });
       return;
     }
@@ -53,7 +54,7 @@ import { SableLog, isNotCommand } from './utils/index.js';
       .command('trash')
       .description('删除项目中无用文件')
       .version('0.0.1', '-v, --version')
-      .option('-e, --entryPath <text>', '项目入口')
+      .option('-e, --entry <text>', '配置文件')
       .action((options) => {
         new SableLog('sable:trash');
         rmTrashSetup(options);

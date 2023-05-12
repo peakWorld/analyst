@@ -1,7 +1,6 @@
 import * as babel from '@babel/core';
 import traverse from '@babel/traverse';
-import * as t from '@babel/types';
-export { default as vueViteAst } from './visitors/vue-vite.js';
+import generate from '@babel/generator';
 
 export const GET_AST_CONFIG = function (): babel.TransformOptions {
   // https://babeljs.io/docs/options babel可用配置参数
@@ -36,35 +35,7 @@ export default class Ast {
     traverse.default(this.ast, visitor);
   }
 
-  // 转换成Obj
-  toObj(path: babel.types.Node) {
-    const isObj = t.isObjectExpression(path);
-    if (!isObj) return null;
-    if (!path.properties?.length) return null;
-    const obj = {};
-    path.properties.forEach((node) => {
-      if (t.isObjectProperty(node)) {
-        const key = this.doLiteral(node.key);
-        if (!key) return;
-        const value = this.doExpression(node.value).join('');
-        obj[key] = value;
-      }
-    });
-    return obj;
-  }
-
-  /** 获取字面值 */
-  doLiteral(node: babel.Node) {
-    if (t.isStringLiteral(node)) {
-      return node.value;
-    }
-    return '';
-  }
-
-  doExpression(node: babel.Node) {
-    if (t.isCallExpression(node)) {
-      return node.arguments.map((it) => this.doLiteral(it));
-    }
-    return [];
+  generate(ast?: babel.Node, options: babel.GeneratorOptions = {}) {
+    return generate.default(ast ?? this.ast, options);
   }
 }

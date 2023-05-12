@@ -1,10 +1,17 @@
+// import type { Visitor } from '@babel/core';
+import { AstProjectOptions } from '../interface.js';
+
 export interface CommandOptions {
-  entryPath: string;
+  entry: string;
 }
 
-export interface Options {
+export interface FileConfig {
+  alias: Record<string, string>;
   entry: string;
-  deps: string[];
-  aliasMap: Record<string, string>;
-  alias: string[];
+  aliasBase: string;
+  visitor: PickValue<AstProjectOptions, 'visitor'>;
+}
+
+export interface MainOptions extends AstProjectOptions {
+  entry: string;
 }

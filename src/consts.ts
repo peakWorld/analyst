@@ -5,3 +5,18 @@ export const vuePCF = [
   'vite.config.js',
   'vite.config.ts',
 ];
+
+export const EXTS = [
+  '.js',
+  '.ts',
+  '.d.ts',
+  '.tsx', // React
+  '.vue', // Vue
+  '.css',
+  '.less',
+  '.scss',
+];
+
+export enum LANG {
+  Less = 'less',
+}
