@@ -1,34 +1,56 @@
 import TemplateAst, { Visitor } from './index.js';
-import { getDataAndDir, saveToTmpFile } from '../../utils/index.js';
-import { ParsingCommonOptions } from '../../interface.js';
+import {
+  getDataAndDir,
+  useRegGetImgUrl,
+  transfromFileUrl,
+  // saveToTmpFile,
+} from '../../utils/index.js';
+import { AstProjectOptions, ParsingCommonOptions } from '../../interface.js';
 
-export default async (option: ParsingCommonOptions) => {
-  const imports = [];
-  const { fileUrl } = option;
-  let { codestr, dir } = option;
-  // 文件地址存在
-  if (fileUrl) {
-    const { dir: dirname, data } = getDataAndDir(fileUrl);
-    dir = dirname;
-    codestr = data;
-  }
+export interface Option extends AstProjectOptions, ParsingCommonOptions {}
 
-  const ast = new TemplateAst(codestr);
-  const visitor: Visitor = {};
-
-  // saveToTmpFile('html.json', ast);
-
-  visitor.Image = (node) => {
-    console.log('img.....', node.attrsMap);
-  };
-
-  visitor.exit = (node) => {
-    if (ast.isElement(node) && ast.isRoot(node)) {
-      console.log('node enter:', node.type, node.tag);
+export default (options: Option) => {
+  return new Promise<string[]>((resolve) => {
+    const { fileUrl } = options;
+    let { codestr, dir } = options;
+    // 文件地址存在
+    if (fileUrl) {
+      const { dir: dirname, data } = getDataAndDir(fileUrl);
+      dir = dirname;
+      codestr = data;
     }
-  };
 
-  ast.run(visitor);
+    const imports = new Set<string>();
+    const ast = new TemplateAst(codestr);
+    const visitor: Visitor = {};
 
-  return imports;
+    // saveToTmpFile('html.json', ast);
+
+    async function onBeforeExit() {
+      const fileUrls = transfromFileUrl(
+        { fileUrls: imports, dir, options },
+        true,
+      );
+      resolve(fileUrls);
+    }
+
+    visitor.Image = (node) => {
+      const { src, [':src']: bindSrc } = node.attrsMap;
+      if (src) {
+        imports.add(src);
+      }
+      if (bindSrc && /require/.test(bindSrc)) {
+        const tmpUrls = useRegGetImgUrl(bindSrc);
+        tmpUrls.forEach((it) => imports.add(it));
+      }
+    };
+
+    visitor.exit = (node) => {
+      if (ast.isElement(node) && ast.isRoot(node)) {
+        onBeforeExit();
+      }
+    };
+
+    ast.run(visitor);
+  });
 };

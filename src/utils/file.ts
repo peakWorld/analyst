@@ -1,9 +1,11 @@
 import path from 'path';
 import fs from 'fs-extra';
+import * as glob from 'glob';
 import { cwd, sablePwd } from './system.js';
 import { vuePCF, EXTS } from '../consts.js';
 import { stringifyWithCircular } from './tools.js';
 import { isObject } from './type.js';
+import { AstProjectOptions } from '../interface.js';
 
 // 从vue.config 或 vite.config 中获取配置信息
 export function getConfigsInVueOrViteFile() {
@@ -55,6 +57,7 @@ export function alias2AbsUrl(
   return particalUrl;
 }
 
+// 校验路径所在文件是否存在
 export function getIntegralPath(fileUrl: string, exts = EXTS) {
   const uri = fileUrl;
   // 路径存在
@@ -84,4 +87,85 @@ export function getDataAndDir(fileUrl: string) {
     data: readData(fileUrl),
     dir: path.dirname(fileUrl),
   };
+}
+
+// 将模板转成glob语句
+// `xx/${*}/xx.js` => `xx/**/xx.js`
+export function template2Glob(fileUrl: string) {
+  const tmpUrl = fileUrl.replace(/[${}`]/g, '');
+  const parsed = path.parse(tmpUrl);
+  const { dir } = parsed;
+  if (/\*/.test(dir)) {
+    parsed.dir = dir.replace(/\*/g, '**');
+  }
+  return path.format(parsed);
+}
+
+interface TransfromFileUrlParam {
+  fileUrls: Set<string>;
+  dir: string;
+  options: AstProjectOptions;
+  deps?: string[];
+}
+
+// 处理相对路径与别名路径的转换
+export function transfromFileUrl(
+  param: TransfromFileUrlParam,
+  useGlob = false, // 是否开启glob寻找文件
+  checkDeps = false, // 是否过滤项目依赖
+) {
+  const { fileUrls, dir, options, deps } = param;
+
+  const { alias, aliasMap, aliasBase } = options;
+  const globRes = [];
+  let res = [];
+
+  fileUrls.forEach((fileUrl) => {
+    // 项目依赖 tdesign || tdesign/**/*.css
+    if (
+      checkDeps &&
+      deps.some((it) => it === fileUrl || fileUrl.startsWith(it))
+    ) {
+      return;
+    }
+
+    let tmpUrl = '';
+    // 别名 @/xx
+    if (alias.some((it) => fileUrl.includes(it))) {
+      tmpUrl = alias2AbsUrl(fileUrl, aliasMap, aliasBase);
+    } else {
+      // 相对路径 ./xx ; 相对于dir得出绝对路径
+      tmpUrl = getAbsFileUrl(fileUrl, dir);
+    }
+    if (!tmpUrl) return;
+
+    if (useGlob && /\*/.test(tmpUrl)) {
+      globRes.push(tmpUrl);
+    } else {
+      res.push(tmpUrl);
+    }
+  });
+
+  if (useGlob && globRes.length) {
+    const tmpGlobRes = globRes.map((it) => glob.globSync(it));
+    res = [...res, ...tmpGlobRes.flat()];
+  }
+  return res.map((it) => getIntegralPath(it));
+}
+
+export function useRegGetImgUrl(str: string) {
+  const regex = /require(.*)/g;
+  const matches = str.match(regex);
+  if (matches) {
+    return matches.map((match) => {
+      // 模板字符串
+      if (/\$/.test(match)) {
+        match = match.replace(/\${[^$/]*}/g, '*');
+        match = template2Glob(match);
+      }
+      // 字符串
+      return match.replace(/^require\('?/, '').replace(/'?\)$/, '');
+    });
+  }
+  return [];
 }

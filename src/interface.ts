@@ -21,3 +21,8 @@ export interface Package {
   devDependencies: Record<string, string>;
   name: string;
 }
+
+export interface ParsingRsp {
+  imports: string[];
+  statics: string[];
+}

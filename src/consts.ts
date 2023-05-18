@@ -19,4 +19,5 @@ export const EXTS = [
 
 export enum LANG {
   Less = 'less',
+  Scss = 'scss',
 }
