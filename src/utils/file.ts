@@ -5,7 +5,7 @@ import { cwd, sablePwd } from './system.js';
 import { vuePCF, EXTS } from '../consts.js';
 import { stringifyWithCircular } from './tools.js';
 import { isObject } from './type.js';
-import { AstProjectOptions } from '../interface.js';
+import { AstContext } from '../interface.js';
 
 // 从vue.config 或 vite.config 中获取配置信息
 export function getConfigsInVueOrViteFile() {
@@ -83,10 +83,10 @@ export function readData(fileUrl: string) {
 }
 
 export function getDataAndDir(fileUrl: string) {
-  return {
-    data: readData(fileUrl),
-    dir: path.dirname(fileUrl),
-  };
+  const codestr = readData(fileUrl);
+  const dirUrl = path.dirname(fileUrl);
+  const ext = path.extname(fileUrl).slice(1);
+  return [codestr, dirUrl, ext];
 }
 
 // 将模板转成glob语句
@@ -101,22 +101,15 @@ export function template2Glob(fileUrl: string) {
   return path.format(parsed);
 }
 
-interface TransfromFileUrlParam {
-  fileUrls: Set<string>;
-  dir: string;
-  options: AstProjectOptions;
-  deps?: string[];
-}
-
 // 处理相对路径与别名路径的转换
 export function transfromFileUrl(
-  param: TransfromFileUrlParam,
+  fileUrls: Set<string>,
+  context: AstContext,
   useGlob = false, // 是否开启glob寻找文件
   checkDeps = false, // 是否过滤项目依赖
 ) {
-  const { fileUrls, dir, options, deps } = param;
+  const { dirUrl, alias, aliasMap, aliasBase, deps } = context;
 
-  const { alias, aliasMap, aliasBase } = options;
   const globRes = [];
   let res = [];
 
@@ -135,7 +128,7 @@ export function transfromFileUrl(
       tmpUrl = alias2AbsUrl(fileUrl, aliasMap, aliasBase);
     } else {
       // 相对路径 ./xx ; 相对于dir得出绝对路径
-      tmpUrl = getAbsFileUrl(fileUrl, dir);
+      tmpUrl = getAbsFileUrl(fileUrl, dirUrl);
     }
     if (!tmpUrl) return;
 

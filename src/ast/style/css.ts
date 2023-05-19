@@ -1,29 +1,13 @@
 import postcss from 'postcss';
-import { getDataAndDir, transfromFileUrl } from '../../utils/index.js';
-import {
-  AstProjectOptions,
-  ParsingCommonOptions,
-  ParsingRsp,
-} from '../../interface.js';
+import { transfromFileUrl } from '../../utils/index.js';
+import { ParsingRsp, AstContext } from '../../interface.js';
 import { LANG } from '../../consts.js';
 
-interface Options extends AstProjectOptions, ParsingCommonOptions {
-  type: LANG;
-}
-
-export default async (options: Options) => {
+export default async (codestr: string, context: AstContext) => {
   const imports = new Set<string>();
   const statics = new Set<string>();
-
   const rsp: ParsingRsp = { imports: [], statics: [] };
-  const { fileUrl, type } = options;
-  let { codestr, dir } = options;
-  // 文件地址存在
-  if (fileUrl) {
-    const { dir: dirname, data } = getDataAndDir(fileUrl);
-    dir = dirname;
-    codestr = data;
-  }
+
   if (/@import | url/.test(codestr)) {
     const root = postcss().process(codestr).root;
 
@@ -37,7 +21,7 @@ export default async (options: Options) => {
       });
 
       if (imports.size) {
-        rsp.imports = transfromFileUrl({ fileUrls: imports, dir, options });
+        rsp.imports = transfromFileUrl(imports, context);
       }
     }
 
@@ -50,7 +34,7 @@ export default async (options: Options) => {
           if (url.includes('http')) return;
 
           // less中 url地址前额外添加～
-          if (type === LANG.Less) {
+          if (context.styleLang === LANG.Less) {
             url = url.replace(/^~/, '');
           }
           statics.add(url);
@@ -58,7 +42,7 @@ export default async (options: Options) => {
       });
 
       if (statics.size) {
-        rsp.statics = transfromFileUrl({ fileUrls: statics, dir, options });
+        rsp.statics = transfromFileUrl(statics, context);
       }
     }
   }

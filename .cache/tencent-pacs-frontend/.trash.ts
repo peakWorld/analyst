@@ -8,6 +8,17 @@ export default () => {
     alias: {
       '@': 'src',
     },
+    rewrite: [
+      {
+        from: '@assets',
+        dirname: 'assets',
+      },
+      {
+        from: '@img',
+        to: '@assets/imgs',
+        diname: 'assets/imgs',
+      },
+    ],
     // visitor: (t: typeof T, ast: Ast, fileUrl: string) => {
     //   // 只处理路由文件 中动态路由
     //   if (!fileUrl || !fileUrl.includes('routers/router.ts')) return;

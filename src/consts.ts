@@ -20,4 +20,7 @@ export const EXTS = [
 export enum LANG {
   Less = 'less',
   Scss = 'scss',
+  Ts = 'ts',
+  Tsx = 'tsx',
+  Vue = 'vue',
 }

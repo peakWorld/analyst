@@ -1,24 +1,18 @@
 import * as babel from '@babel/core';
 import * as t from '@babel/types';
 import Ast, { GET_AST_CONFIG } from '../index.js';
-import {
-  AstProjectOptions,
-  ParsingCommonOptions,
-  ParsingRsp,
-} from '../../interface.js';
-import {
-  getDataAndDir,
-  transfromFileUrl,
-  // saveToTmpFile,
-} from '../../utils/index.js';
-
-export interface Option extends AstProjectOptions, ParsingCommonOptions {}
+import { ParsingRsp, AstContext } from '../../interface.js';
+import { transfromFileUrl } from '../../utils/index.js';
 
 export interface DyParsingRsp extends ParsingRsp {
   dyImports: string[];
 }
 
-export default (options: Option, plugins: babel.PluginItem[] = []) => {
+export default (
+  codestr: string,
+  context: AstContext,
+  plugins: babel.PluginItem[] = [],
+) => {
   const AST_CONFIG = GET_AST_CONFIG();
   AST_CONFIG.configFile = false;
   AST_CONFIG.parserOpts.plugins.push('typescript');
@@ -27,14 +21,6 @@ export default (options: Option, plugins: babel.PluginItem[] = []) => {
   }
 
   return new Promise<DyParsingRsp>((resolve) => {
-    const { fileUrl, deps } = options;
-    let { codestr, dir } = options;
-    if (fileUrl) {
-      const { dir: dirname, data } = getDataAndDir(fileUrl);
-      dir = dirname;
-      codestr = data;
-    }
-
     const ast = new Ast(codestr, AST_CONFIG);
     const visitor: babel.Visitor = {};
     const imports = new Set<string>();
@@ -45,25 +31,15 @@ export default (options: Option, plugins: babel.PluginItem[] = []) => {
       const rsp: DyParsingRsp = { imports: [], statics: [], dyImports: [] };
 
       if (imports.size) {
-        rsp.imports = transfromFileUrl(
-          { fileUrls: imports, dir, options, deps },
-          true,
-          true,
-        );
+        rsp.imports = transfromFileUrl(imports, context, true, true);
       }
 
       if (statics.size) {
-        rsp.statics = transfromFileUrl(
-          { fileUrls: statics, dir, options },
-          true,
-        );
+        rsp.statics = transfromFileUrl(statics, context, true);
       }
 
       if (dyImports.size) {
-        rsp.dyImports = transfromFileUrl(
-          { fileUrls: dyImports, dir, options },
-          true,
-        );
+        rsp.dyImports = transfromFileUrl(dyImports, context, true);
       }
 
       resolve(rsp);
@@ -102,7 +78,6 @@ export default (options: Option, plugins: babel.PluginItem[] = []) => {
           if (tmpFileUrl) {
             dyImports.add(tmpFileUrl);
           }
-          // saveToTmpFile('dy-tmp-import.json', path.node);
         }
       }
     };

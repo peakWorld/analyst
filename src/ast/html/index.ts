@@ -17,8 +17,6 @@ export interface Visitor {
   exit?: (node: ASTNode) => void;
 }
 
-// export interface Context {}
-
 export default class TemplateAst {
   private ast!: ASTNode;
 

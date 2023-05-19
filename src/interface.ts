@@ -1,5 +1,4 @@
-import type Ast from './ast/index.js';
-import * as T from '@babel/types';
+import type { LANG } from './consts.js';
 
 // 解析项目必备参数
 export interface AstProjectOptions {
@@ -7,13 +6,6 @@ export interface AstProjectOptions {
   aliasMap: Record<string, string>;
   alias: string[];
   aliasBase: string;
-  visitor: (t: typeof T, ast: Ast, fileUrl: string) => Promise<string[]>;
-}
-
-export interface ParsingCommonOptions {
-  fileUrl?: string;
-  codestr?: string;
-  dir?: string;
 }
 
 export interface Package {
@@ -25,4 +17,16 @@ export interface Package {
 export interface ParsingRsp {
   imports: string[];
   statics: string[];
+}
+
+export interface AstContext extends AstProjectOptions {
+  /** 已处理文件 */
+  parsed: Set<string>;
+  /** 静态资源 */
+  statics: Set<string>;
+
+  currentUrl: string;
+  dirUrl: string;
+
+  styleLang?: LANG;
 }

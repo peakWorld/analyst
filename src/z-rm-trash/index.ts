@@ -35,7 +35,6 @@ export default async function setup(commandOptions: CommandOptions) {
     alias: [],
     aliasMap: {},
     aliasBase: configs.aliasBase ?? '@',
-    visitor: configs.visitor,
   };
 
   // 获取项目中的别名alias

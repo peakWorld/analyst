@@ -1,36 +1,15 @@
 import TemplateAst, { Visitor } from './index.js';
-import {
-  getDataAndDir,
-  useRegGetImgUrl,
-  transfromFileUrl,
-  // saveToTmpFile,
-} from '../../utils/index.js';
-import { AstProjectOptions, ParsingCommonOptions } from '../../interface.js';
+import { useRegGetImgUrl, transfromFileUrl } from '../../utils/index.js';
+import { AstContext } from '../../interface.js';
 
-export interface Option extends AstProjectOptions, ParsingCommonOptions {}
-
-export default (options: Option) => {
+export default (codestr: string, context: AstContext) => {
   return new Promise<string[]>((resolve) => {
-    const { fileUrl } = options;
-    let { codestr, dir } = options;
-    // 文件地址存在
-    if (fileUrl) {
-      const { dir: dirname, data } = getDataAndDir(fileUrl);
-      dir = dirname;
-      codestr = data;
-    }
-
     const imports = new Set<string>();
     const ast = new TemplateAst(codestr);
     const visitor: Visitor = {};
 
-    // saveToTmpFile('html.json', ast);
-
     async function onBeforeExit() {
-      const fileUrls = transfromFileUrl(
-        { fileUrls: imports, dir, options },
-        true,
-      );
+      const fileUrls = transfromFileUrl(imports, context, true);
       resolve(fileUrls);
     }
 
