@@ -1,21 +1,19 @@
 import * as babel from '@babel/core';
 import * as t from '@babel/types';
+import proposalDecorators from '@babel/plugin-proposal-decorators';
 import Ast, { GET_AST_CONFIG } from '../index.js';
-import { ParsingRsp, AstContext } from '../../interface.js';
-import { transfromFileUrl } from '../../utils/index.js';
-
-export interface DyParsingRsp extends ParsingRsp {
-  dyImports: string[];
-}
+import { DyParsingRsp, Context } from '../../interface.js';
+// import { saveToTmpFile } from '../../../utils/index.js';
 
 export default (
   codestr: string,
-  context: AstContext,
+  context: Context,
   plugins: babel.PluginItem[] = [],
 ) => {
   const AST_CONFIG = GET_AST_CONFIG();
   AST_CONFIG.configFile = false;
   AST_CONFIG.parserOpts.plugins.push('typescript');
+  AST_CONFIG.plugins.push([proposalDecorators, { legacy: true }]);
   if (plugins?.length) {
     AST_CONFIG.plugins = [...AST_CONFIG.plugins, ...plugins];
   }
@@ -26,29 +24,34 @@ export default (
     const imports = new Set<string>();
     const statics = new Set<string>();
     const dyImports = new Set<string>();
+    const { $utils } = context;
 
     async function onBeforeExit() {
       const rsp: DyParsingRsp = { imports: [], statics: [], dyImports: [] };
 
       if (imports.size) {
-        rsp.imports = transfromFileUrl(imports, context, true, true);
+        rsp.imports = $utils.transfromFileUrl(context, imports, true, true);
       }
 
       if (statics.size) {
-        rsp.statics = transfromFileUrl(statics, context, true);
+        rsp.statics = $utils.transfromFileUrl(context, statics, true);
+        $utils.addStaticUrl(rsp.statics);
       }
 
       if (dyImports.size) {
-        rsp.dyImports = transfromFileUrl(dyImports, context, true);
+        rsp.dyImports = $utils.transfromFileUrl(context, dyImports, true);
+        $utils.addDynamicsUrl(rsp.dyImports);
       }
 
       resolve(rsp);
     }
 
     // 处理静态导入 import xx
-    visitor.ImportDeclaration = (path) => {
-      const { node } = path;
-      imports.add(node.source.value); // 导入的路径
+    visitor.ImportDeclaration = {
+      enter(path) {
+        const { node } = path;
+        imports.add(node.source.value); // 导入的路径
+      },
     };
 
     visitor.CallExpression = (path) => {
@@ -82,11 +85,11 @@ export default (
       }
     };
 
-    visitor.enter = (node) => {
-      if (t.isProgram(node)) {
-        // saveToTmpFile('file.json', node);
-      }
-    };
+    // visitor.enter = (node) => {
+    //   if (t.isProgram(node)) {
+    //     saveToTmpFile('file.json', node);
+    //   }
+    // };
 
     visitor.exit = (node) => {
       if (t.isProgram(node)) {

@@ -4,19 +4,25 @@
 
 export default () => {
   return {
+    // 人口
     entry: 'src/main.ts',
+    // 可处理区域
+    include: ['src'],
+    // 路径别名
     alias: {
       '@': 'src',
+      '@tencent/aimis-image-viewport': 'sub_modules/aimis-image-viewport/src',
     },
+    // 文件迁移
     rewrite: [
       {
         from: '@assets',
-        dirname: 'assets',
+        dirname: 'src/assets',
       },
       {
         from: '@img',
         to: '@assets/imgs',
-        diname: 'assets/imgs',
+        dirname: 'src/assets/imgs',
       },
     ],
     // visitor: (t: typeof T, ast: Ast, fileUrl: string) => {

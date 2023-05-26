@@ -2,7 +2,7 @@ import path from 'path';
 import * as babel from '@babel/core';
 import commonjs from '@babel/plugin-transform-modules-commonjs';
 import transform from '@babel/plugin-transform-typescript';
-import { isObject } from './type.js';
+import { isFunc, isObject } from './type.js';
 import { readData } from './file.js';
 import { sablePwd, pkageJson } from './system.js';
 
@@ -33,4 +33,20 @@ export function executeEs(fileUrl: string) {
 // 获取cache中的文件配置
 export function getCacheFile(fileName = '') {
   return path.join(sablePwd, './.cache', pkageJson.name, fileName);
+}
+
+export function upperFirstCase(str: string) {
+  return str.slice(0, 1).toLocaleUpperCase() + str.slice(1);
+}
+
+export function proxy<T extends Record<string | symbol, any>>(target: T): T {
+  return new Proxy(target, {
+    get(target, key) {
+      const val = target[key];
+      if (isFunc(val)) {
+        return val.bind(target);
+      }
+      return val;
+    },
+  });
 }

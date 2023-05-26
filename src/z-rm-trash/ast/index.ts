@@ -2,7 +2,7 @@ import * as babel from '@babel/core';
 import * as t from '@babel/types';
 import traverse from '@babel/traverse';
 import generate from '@babel/generator';
-import { template2Glob } from '../utils/index.js';
+import { template2Glob } from '../../utils/index.js';
 export { default as vueViteAst } from './visitors/vue-vite.js';
 
 export const GET_AST_CONFIG = function (): babel.TransformOptions {
