@@ -43,37 +43,40 @@ export function getAbsFileUrl(fileUrl: string, dirname = cwd) {
   return uri;
 }
 
-export function alias2AbsUrl(
+export function getMatchAlias(
   importUrl: string,
   aliasMap: Record<string, string>,
   aliasBase: string,
 ) {
-  const alias = Object.keys(aliasMap).filter((it) => it !== aliasBase); // 先匹配非根别名
-  const matchAlias =
-    alias.filter((it) => importUrl.startsWith(it))[0] ?? aliasBase;
-  const particalUrl = importUrl.replace(matchAlias, aliasMap[matchAlias]);
-  return particalUrl;
+  // 先匹配非根别名
+  const aliasExcludeBase = Object.keys(aliasMap).filter(
+    (it) => it !== aliasBase,
+  );
+  const match =
+    aliasExcludeBase.filter((it) => importUrl.startsWith(it))[0] ?? aliasBase;
+  return match;
 }
 
-// 校验路径所在文件是否存在
-export function getIntegralPath(fileUrl: string, exts = EXTS) {
+// 获取文件后缀
+export function getPendingSuffix(fileUrl: string, exts = EXTS) {
   const uri = fileUrl;
   // 路径存在
   if (fs.existsSync(uri)) {
     const stat = fs.lstatSync(uri); // 信息
     // 文件夹
     if (stat.isDirectory()) {
-      return getIntegralPath(`${uri}/index`);
+      const suffix = getPendingSuffix(`${uri}/index`);
+      return suffix ? `/index${suffix}` : suffix;
     }
-    return uri;
+    return '';
   }
   // 路径不存在 加后缀[.ext]
   const ext = exts.filter((ext) => fs.existsSync(`${uri}${ext}`))[0];
   if (!ext) {
     console.vlog(`不存在文件: ${uri}`);
-    return;
+    return '';
   }
-  return `${uri}${ext}`;
+  return ext;
 }
 
 export function readData(fileUrl: string) {

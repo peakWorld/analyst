@@ -1,33 +1,51 @@
 import TemplateAst, { Visitor } from './index.js';
-import { Context } from '../../interface.js';
+import { Context, ParsingRsp } from '../../interface.js';
+import { setAddArrItem, saveToTmpFile } from '../../../utils/index.js';
+
+type Rsp = Omit<ParsingRsp, 'imports'>;
 
 export default (codestr: string, context: Context) => {
-  return new Promise<string[]>((resolve) => {
-    const imports = new Set<string>();
+  return new Promise<Rsp>((resolve) => {
+    const statics = new Set<string>();
+
     const ast = new TemplateAst(codestr);
     const { $utils } = context;
     const visitor: Visitor = {};
 
     async function onBeforeExit() {
-      const fileUrls = $utils.transfromFileUrl(context, imports, true);
-      resolve(fileUrls);
+      const rsp: Rsp = { statics: [] };
+      rsp.statics = Array.from(statics);
+      resolve(rsp);
     }
 
-    visitor.Image = (node) => {
+    visitor.Img = (node) => {
       const { src, [':src']: bindSrc } = node.attrsMap;
+      let urls = [];
+
       if (src) {
-        imports.add(src);
+        urls.push(src);
       }
+      // require('xx') | require('xx${yy}')
       if (bindSrc && /require/.test(bindSrc)) {
-        const tmpUrls = $utils.useRegGetImgUrl(bindSrc);
-        tmpUrls.forEach((it) => imports.add(it));
+        urls = $utils.useRegGetRequireImgUrl(bindSrc);
       }
+
+      urls.forEach((url) => {
+        if (url.includes('http')) return;
+
+        const rsp = $utils.transfromAliasOrRelativeUrl({ url });
+        setAddArrItem(statics, rsp);
+      });
     };
 
-    visitor.exit = (node) => {
-      if (ast.isElement(node) && ast.isRoot(node)) {
+    visitor.Root = (node) => {
+      // saveToTmpFile('template.json', node);
+      // console.vlog('node', node);
+      return () => {
+        ast.generate();
+
         onBeforeExit();
-      }
+      };
     };
 
     ast.run(visitor);

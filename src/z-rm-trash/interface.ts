@@ -12,6 +12,13 @@ export interface Rewrite {
   dirname: string;
 }
 
+export interface TransARUrl {
+  url: string;
+  originUrl?: string;
+  useGlob?: boolean;
+  checkDeps?: boolean;
+}
+
 // 配置文件
 export interface FileConfig {
   entry: string;
@@ -36,6 +43,12 @@ export interface DyParsingRsp extends ParsingRsp {
   dyImports: string[];
 }
 
+export interface MigrateMeta {
+  fromAlias: string;
+  toAlias: string;
+  toFileUrl: string;
+}
+
 export interface Context extends AstProjectOptions {
   /** 已处理文件 */
   parsed: Set<string>;
@@ -45,6 +58,7 @@ export interface Context extends AstProjectOptions {
   dynamics: Set<string>;
   /** .d.ts */
   dts: Set<string>;
+  migrates: Map<string, MigrateMeta>;
 
   currentUrl: string;
   dirUrl: string;

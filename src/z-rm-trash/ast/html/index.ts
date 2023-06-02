@@ -4,33 +4,45 @@ import compiler, {
   ASTExpression,
   ASTElement,
 } from 'vue-template-compiler';
+import { upperFirstCase } from '../../../utils/index.js';
+
+type VisitorFunc<T> = (
+  node: T,
+  context: TraverseContext,
+) => void | (() => void);
 
 export interface Visitor {
-  Text?: (node: ASTText) => void;
-  Expression?: (node: ASTExpression) => void;
-  Element?: (node: ASTElement) => void;
+  Text?: VisitorFunc<ASTText>;
+  Expression?: VisitorFunc<ASTExpression>;
+  Element?: VisitorFunc<ASTElement>;
 
-  Div?: (node: ASTElement) => void;
-  Image?: (node: ASTElement) => void;
+  Root?: VisitorFunc<ASTElement>;
+  Div?: VisitorFunc<ASTElement>;
+  Img?: VisitorFunc<ASTElement>;
+}
 
-  enter?: (node: ASTNode) => void;
-  exit?: (node: ASTNode) => void;
+export interface TraverseContext {
+  currentNode: ASTNode | null;
+  childIndex: number;
+  parent: ASTNode | null;
+  nodeTransforms: Array<VisitorFunc<ASTNode>>;
+}
+
+export interface GenContext {
+  code: string;
+  push: (code: string) => void;
 }
 
 export default class TemplateAst {
-  private ast!: ASTNode;
+  private ast!: ASTElement;
 
   private visitor!: Visitor;
 
   code_str!: string;
 
   constructor(code_str: string) {
-    this.ast = this.addRoot(compiler.compile(code_str).ast);
-  }
-
-  run(visitor: Visitor) {
-    this.visitor = visitor;
-    this.traverse(this.ast);
+    const { ast } = compiler.compile(code_str);
+    this.ast = this.addRoot(ast);
   }
 
   // 增加虚拟根节点
@@ -45,34 +57,117 @@ export default class TemplateAst {
     } as unknown as ASTElement;
   }
 
-  private traverse(node: ASTNode) {
-    const { enter, exit, Element, Expression, Text, Div, Image } = this.visitor;
+  run(visitor: Visitor) {
+    this.visitor = visitor;
+    const context = {
+      currentNode: null,
+      childIndex: 0,
+      parent: null,
+      nodeTransforms: [
+        this.transformElement.bind(this),
+        this.transformExpression.bind(this),
+        this.transformText.bind(this),
+      ],
+    };
 
-    enter && enter(node);
+    this.traverse(this.ast, context);
+  }
 
-    if (node.type === 1) {
-      switch (node.tag) {
-        case 'div':
-          Div && Div(node);
-          break;
-        case 'img':
-          Image && Image(node);
-          break;
+  private transformElement(node: ASTNode, context: TraverseContext) {
+    if (!this.isElement(node)) return;
+    const func = this.visitor[upperFirstCase(node.tag)];
+    if (!func) return;
+    return func(node, context);
+  }
+
+  private transformExpression(node: ASTNode, context: TraverseContext) {
+    if (!this.isExpression(node)) return;
+    const func = this.visitor.Expression;
+    if (!func) return;
+    return func(node, context);
+  }
+
+  private transformText(node: ASTNode, context: TraverseContext) {
+    if (!this.isText(node)) return;
+    const func = this.visitor.Text;
+    if (!func) return;
+    return func(node, context);
+  }
+
+  private traverse(node: ASTNode, context: TraverseContext) {
+    context.currentNode = node;
+    const transforms = context.nodeTransforms;
+
+    const exitFns = [];
+    for (let i = 0; i < transforms.length; i++) {
+      const onExit = transforms[i](context.currentNode, context);
+      if (onExit) {
+        exitFns.push(onExit);
       }
-      // 标签
-      Element && Element(node);
-      if (node.children) {
-        node.children.forEach((it) => this.traverse(it));
-      }
-    } else if (node.type === 2) {
-      // 语句
-      Expression && Expression(node);
-    } else if (node.type === 3) {
-      // 文本
-      Text && Text(node);
+      if (!context.currentNode) return;
     }
 
-    exit && exit(node);
+    if (this.isElement(context.currentNode)) {
+      const children = context.currentNode.children;
+      if (children.length) {
+        for (let i = 0; i < children.length; i++) {
+          context.parent = context.currentNode;
+          context.childIndex = i;
+          this.traverse(children[i], context);
+        }
+      }
+    }
+
+    let i = exitFns.length;
+    while (i--) {
+      exitFns[i]();
+    }
+  }
+
+  generate() {
+    const context: GenContext = {
+      code: '',
+      push(code) {
+        context.code += code;
+      },
+    };
+
+    this.genNode(this.ast.children[0], context);
+
+    console.log('code', context.code);
+  }
+
+  private genNode(node: ASTNode, context: GenContext) {
+    if (this.isElement(node)) {
+      context.push('<');
+      context.push(node.tag);
+      // 属性
+      if (Object.keys(node.attrsMap).length) {
+        Object.keys(node.attrsMap)?.forEach((k) => {
+          const v = node.attrsMap[k];
+          if (!v) {
+            context.push(` ${k}`);
+          } else {
+            context.push(` ${k}="${v}"`);
+          }
+        });
+      }
+      if (!node.children.length) {
+        context.push('/>');
+      } else {
+        context.push('>');
+      }
+
+      // 子节点
+      if (node.children.length) {
+        node.children.forEach((n) => this.genNode(n, context));
+        context.push(`</${node.tag}>`);
+      }
+    }
+
+    if (this.isText(node) || this.isExpression(node)) {
+      context.push(node.text);
+    }
   }
 
   isElement(node: ASTNode): node is ASTElement {

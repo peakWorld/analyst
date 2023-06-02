@@ -2,6 +2,7 @@ import postcss from 'postcss';
 import less from 'postcss-less';
 import { ParsingRsp, Context } from '../../interface.js';
 import { LANG } from '../../../consts.js';
+import { setAddArrItem } from '../../../utils/index.js';
 
 export default async (codestr: string, context: Context, lang = LANG.Css) => {
   const imports = new Set<string>();
@@ -21,12 +22,15 @@ export default async (codestr: string, context: Context, lang = LANG.Css) => {
       root.walkAtRules((rule) => {
         if (rule.name === 'import') {
           if (!rule.params) return;
-          imports.add(rule.params.replace(/['"]/g, ''));
+          const rsp = $utils.transfromAliasOrRelativeUrl({
+            url: rule.params.replace(/['"]/g, ''),
+          });
+          setAddArrItem(imports, rsp);
         }
       });
 
       if (imports.size) {
-        rsp.imports = $utils.transfromFileUrl(context, imports);
+        rsp.imports = Array.from(imports);
       }
     }
 
@@ -34,20 +38,22 @@ export default async (codestr: string, context: Context, lang = LANG.Css) => {
     if (/url/.test(codestr)) {
       root.walkDecls((decl) => {
         if (decl.value.includes('url(')) {
-          let url = decl.value.replace(/^url\(/, '').replace(/\)$/, '');
-          // 不处理网络请求地址
-          if (url.includes('http')) return;
+          let urls = $utils.useRegGetImgUrl(decl.value);
 
           // less中 url地址前额外添加～
           if (lang === LANG.Less) {
-            url = url.replace(/^~/, '');
+            urls = urls.map((url) => url.replace(/^~/, ''));
           }
-          statics.add(url);
+
+          urls.forEach((url) => {
+            const rsp = $utils.transfromAliasOrRelativeUrl({ url });
+            setAddArrItem(statics, rsp);
+          });
         }
       });
 
       if (statics.size) {
-        rsp.statics = $utils.transfromFileUrl(context, statics);
+        rsp.statics = Array.from(statics);
         $utils.addStaticUrl(rsp.statics);
       }
     }

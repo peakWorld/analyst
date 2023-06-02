@@ -2,7 +2,7 @@ import path from 'path';
 import * as babel from '@babel/core';
 import commonjs from '@babel/plugin-transform-modules-commonjs';
 import transform from '@babel/plugin-transform-typescript';
-import { isFunc, isObject } from './type.js';
+import { isFunc, isObject, isMap, isSet } from './type.js';
 import { readData } from './file.js';
 import { sablePwd, pkageJson } from './system.js';
 
@@ -14,6 +14,16 @@ export function stringifyWithCircular(obj: Record<string, any>) {
       if (cache.includes(value)) return;
       cache.push(value);
     }
+    if (isMap(value)) {
+      const record = {};
+      Array.from(value.keys()).forEach((k) => (record[k] = value.get(k)));
+      return record;
+    }
+
+    if (isSet(value)) {
+      return Array.from(value);
+    }
+
     return value;
   });
   cache = [];
@@ -49,4 +59,10 @@ export function proxy<T extends Record<string | symbol, any>>(target: T): T {
       return val;
     },
   });
+}
+
+export function setAddArrItem<T = string | number>(set: Set<T>, arr: T[]) {
+  if (!arr.length) return set;
+  arr.forEach((it) => set.add(it));
+  return set;
 }

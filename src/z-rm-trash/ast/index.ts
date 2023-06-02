@@ -46,8 +46,12 @@ export default class Ast {
     if (t.isTemplateLiteral(node)) {
       const expressions = node.expressions;
       node.expressions = expressions.map(() => t.identifier('*'));
-      return template2Glob(this.generate(node).code);
+      return template2Glob(this.generateNode(node));
     }
     return '';
+  }
+
+  generateNode(node: babel.Node) {
+    return this.generate(node).code.replace(/[`]/g, '');
   }
 }

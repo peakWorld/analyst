@@ -10,7 +10,7 @@ import Main from './main.js';
 import {
   getAbsFileUrl,
   getConfigsInVueOrViteFile,
-  getIntegralPath,
+  getPendingSuffix,
   executeEs,
   pkageJson,
   getCacheFile,
@@ -28,9 +28,11 @@ import type {
 
 export default async function setup(commandOptions: CommandOptions) {
   const { entry } = commandOptions;
-  const configFile = getIntegralPath(
-    getAbsFileUrl(entry ?? getCacheFile('.trash')),
-  );
+  // TODO
+  const configFileUrl = getAbsFileUrl(entry ?? getCacheFile('.trash'));
+  const suffix = getPendingSuffix(configFileUrl);
+  const configFile = `${configFileUrl}${suffix}`;
+
   console.vlog('configFile', configFile);
   if (!fs.existsSync(configFile)) {
     return console.error(`配置文件不存在 => ${configFile}`);
@@ -107,7 +109,7 @@ export default async function setup(commandOptions: CommandOptions) {
   options.include = include;
   options.migrate = migrate;
 
-  // saveToTmpFile('trash-options.json', options);
   console.vlog('options', options);
+  // saveToTmpFile('options.json', options);
   new Main(options);
 }

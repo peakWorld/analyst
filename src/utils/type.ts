@@ -29,6 +29,10 @@ export function isSet<T = any>(data: unknown): data is Set<T> {
   return ['set'].includes(checkType(data));
 }
 
+export function isMap<T = any, K = any>(data: unknown): data is Map<T, K> {
+  return ['map'].includes(checkType(data));
+}
+
 export function isFunc(data: unknown) {
   return ['function', 'asyncfunction'].includes(checkType(data));
 }

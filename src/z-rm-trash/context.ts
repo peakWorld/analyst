@@ -1,13 +1,13 @@
 import fs from 'fs-extra';
 import * as glob from 'glob';
-import { Context } from './interface.js';
+import { Context, MigrateMeta, TransARUrl } from './interface.js';
 import {
   isString,
   isArray,
   isSet,
-  alias2AbsUrl,
+  getMatchAlias,
   getAbsFileUrl,
-  getIntegralPath,
+  getPendingSuffix,
   template2Glob,
 } from '../utils/index.js';
 
@@ -42,49 +42,81 @@ export default class ContextUtils {
     fs.writeFileSync(fileUrl, data);
   }
 
-  transfromFileUrl(
-    context: Context,
-    fileUrls: Set<string>,
-    useGlob = false, // 是否开启glob寻找文件
-    checkDeps = false, // 是否过滤项目依赖
-  ) {
-    const { dirUrl, alias, aliasMap, aliasBase, deps } = context;
-    const globRes = [];
-    let res = [];
-    fileUrls.forEach((fileUrl) => {
-      // 项目依赖 tdesign || tdesign/**/*.css
-      if (
-        checkDeps &&
-        deps.some((it) => it === fileUrl || fileUrl.startsWith(it))
-      ) {
-        return;
-      }
+  transfromAliasOrRelativeUrl(params: TransARUrl) {
+    const {
+      url: aliasOrRelativeUrl,
+      originUrl,
+      useGlob = false, // 是否开启glob寻找文件
+      checkDeps = false, // 是否过滤项目依赖
+    } = params;
 
-      let tmpUrl = '';
-      // 别名 @/xx
-      if (alias.some((it) => fileUrl.includes(it))) {
-        tmpUrl = alias2AbsUrl(fileUrl, aliasMap, aliasBase);
-      } else {
-        // 相对路径 ./xx ; 相对于dir得出绝对路径
-        tmpUrl = getAbsFileUrl(fileUrl, dirUrl);
-      }
-      if (!tmpUrl) return;
+    const { context } = this;
+    const { dirUrl, alias, aliasMap, aliasBase, deps, migrates, migrate } =
+      context;
+    let rsp = [];
 
-      if (useGlob && /\*/.test(tmpUrl)) {
-        globRes.push(tmpUrl);
-      } else {
-        res.push(tmpUrl);
-      }
-    });
+    if (!aliasOrRelativeUrl) return rsp;
 
-    if (useGlob && globRes.length) {
-      const tmpGlobRes = globRes.map((it) => glob.globSync(it));
-      res = [...res, ...tmpGlobRes.flat()];
+    // 检查项目依赖、且aliasOrRelativeUrl是项目依赖
+    if (
+      checkDeps &&
+      deps.some(
+        (it) => it === aliasOrRelativeUrl || aliasOrRelativeUrl.startsWith(it),
+      )
+    )
+      return rsp;
+
+    let tmpUrl = '';
+    let matchAlias = '';
+
+    // 别名 @/xx
+    if (alias.some((it) => aliasOrRelativeUrl.includes(it))) {
+      matchAlias = getMatchAlias(aliasOrRelativeUrl, aliasMap, aliasBase);
+      tmpUrl = aliasOrRelativeUrl.replace(matchAlias, aliasMap[matchAlias]);
+    } else {
+      // 相对路径 ./xx ; 相对于dir得出绝对路径
+      tmpUrl = getAbsFileUrl(aliasOrRelativeUrl, dirUrl);
     }
-    return res.map((it) => getIntegralPath(it));
+    const isShouldGlob = useGlob && /\*/.test(tmpUrl);
+
+    // tmpUrl glob匹配模式
+    if (isShouldGlob) {
+      const globUrls = glob.globSync(tmpUrl);
+      if (!globUrls?.length) return rsp;
+      rsp = globUrls;
+    } else {
+      // 缺少文件后缀
+      const suffix = getPendingSuffix(tmpUrl);
+      rsp.push(`${tmpUrl}${suffix}`);
+    }
+
+    // 此时, rsp中的元素都是完整的路径
+
+    // 需要迁移文件, 只有alias别名才迁移
+    if (Object.keys(migrate).length && matchAlias) {
+      const migrateItem = migrate[matchAlias];
+      // 迁移配置中包含该别名
+      if (migrateItem) {
+        const { to, dirname } = migrateItem;
+        const fromDir = aliasMap[matchAlias];
+        const fromAlias = isShouldGlob ? originUrl : aliasOrRelativeUrl;
+        const toAlias = fromAlias.replace(matchAlias, to);
+
+        rsp.forEach((it) => {
+          const meta: MigrateMeta = {
+            fromAlias,
+            toAlias,
+            toFileUrl: it.replace(fromDir, dirname),
+          };
+          migrates.set(it, meta);
+        });
+      }
+    }
+
+    return rsp;
   }
 
-  useRegGetImgUrl(str: string) {
+  useRegGetRequireImgUrl(str: string) {
     const regex = /require(.*)/g;
     const matches = str.match(regex);
     if (matches) {
@@ -99,5 +131,22 @@ export default class ContextUtils {
       });
     }
     return [];
+  }
+
+  useRegGetImgUrl(str: string) {
+    const regex = /url(.*)/g;
+    const matches = str.match(regex);
+    const urls = [];
+    matches?.forEach((match) => {
+      let url = match.replace(/^url\(['"]?/, '').replace(/['"]?\)[\s\S]*$/, '');
+      // 不处理网络请求地址 或 base64
+      if (url.includes('http') || url.startsWith('data:')) return;
+      // 图片带有参数
+      if (/\..*?.*/.test(url)) {
+        url = url.split('?')[0];
+      }
+      urls.push(url);
+    });
+    return urls;
   }
 }

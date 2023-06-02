@@ -2,8 +2,8 @@ import * as babel from '@babel/core';
 import * as t from '@babel/types';
 import proposalDecorators from '@babel/plugin-proposal-decorators';
 import Ast, { GET_AST_CONFIG } from '../index.js';
-import { DyParsingRsp, Context } from '../../interface.js';
-// import { saveToTmpFile } from '../../../utils/index.js';
+import { DyParsingRsp, Context, TransARUrl } from '../../interface.js';
+import { setAddArrItem } from '../../../utils/index.js';
 
 export default (
   codestr: string,
@@ -30,16 +30,16 @@ export default (
       const rsp: DyParsingRsp = { imports: [], statics: [], dyImports: [] };
 
       if (imports.size) {
-        rsp.imports = $utils.transfromFileUrl(context, imports, true, true);
+        rsp.imports = Array.from(imports);
       }
 
       if (statics.size) {
-        rsp.statics = $utils.transfromFileUrl(context, statics, true);
+        rsp.statics = Array.from(statics);
         $utils.addStaticUrl(rsp.statics);
       }
 
       if (dyImports.size) {
-        rsp.dyImports = $utils.transfromFileUrl(context, dyImports, true);
+        rsp.dyImports = Array.from(dyImports);
         $utils.addDynamicsUrl(rsp.dyImports);
       }
 
@@ -50,39 +50,31 @@ export default (
     visitor.ImportDeclaration = {
       enter(path) {
         const { node } = path;
-        imports.add(node.source.value); // 导入的路径
+        const rsp = $utils.transfromAliasOrRelativeUrl({
+          url: node.source.value,
+          checkDeps: true,
+        });
+        setAddArrItem(imports, rsp);
       },
     };
 
     visitor.CallExpression = (path) => {
       const { callee } = path.node;
       const arg0 = path.node.arguments[0];
-      // 处理静态资源 require('xx')
-      if (t.isIdentifier(callee, { name: 'require' })) {
-        if (t.isStringLiteral(arg0)) {
-          statics.add(arg0.value);
-        }
-        if (t.isTemplateLiteral(arg0)) {
-          const tmpFileUrl = ast.tmplate2Glob(arg0);
-          if (tmpFileUrl) {
-            statics.add(tmpFileUrl);
-          }
-        }
-      }
 
-      // 处理动态import('xx' | 'xx${xx}xx')
-      if (t.isImport(callee)) {
-        if (t.isStringLiteral(arg0)) {
-          dyImports.add(arg0.value);
-        }
+      if (!t.isIdentifier(callee, { name: 'require' }) && !t.isImport(callee))
+        return;
 
-        if (t.isTemplateLiteral(arg0)) {
-          const tmpFileUrl = ast.tmplate2Glob(arg0);
-          if (tmpFileUrl) {
-            dyImports.add(tmpFileUrl);
-          }
-        }
+      const params = { useGlob: true } as TransARUrl;
+      if (t.isStringLiteral(arg0)) {
+        params.url = arg0.value;
       }
+      if (t.isTemplateLiteral(arg0)) {
+        params.url = ast.tmplate2Glob(arg0);
+        params.originUrl = ast.generateNode(arg0);
+      }
+      const rsp = $utils.transfromAliasOrRelativeUrl(params);
+      setAddArrItem(t.isImport(callee) ? dyImports : statics, rsp);
     };
 
     // visitor.enter = (node) => {

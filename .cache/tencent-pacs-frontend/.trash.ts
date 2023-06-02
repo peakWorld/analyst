@@ -11,6 +11,7 @@ export default () => {
     // 路径别名
     alias: {
       '@': 'src',
+      // '@/page': 'src/page',
       '@tencent/aimis-image-viewport': 'sub_modules/aimis-image-viewport/src',
     },
     // 文件迁移
@@ -24,6 +25,11 @@ export default () => {
         to: '@assets/imgs',
         dirname: 'src/assets/imgs',
       },
+      // {
+      //   from: '@/page',
+      //   to: '@page',
+      //   dirname: 'src/pages',
+      // },
     ],
     // visitor: (t: typeof T, ast: Ast, fileUrl: string) => {
     //   // 只处理路由文件 中动态路由

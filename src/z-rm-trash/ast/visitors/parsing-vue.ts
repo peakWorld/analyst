@@ -5,6 +5,7 @@ import astParsing from './parsing.js';
 import cssParsing from '../style/css.js';
 import templateParsing from '../html/template-vue.js';
 import { LANG } from '../../../consts.js';
+import { setAddArrItem } from '../../../utils/index.js';
 
 export default async (codestr: string, context: Context) => {
   const rsp: DyParsingRsp = { imports: [], statics: [], dyImports: [] };
@@ -13,8 +14,8 @@ export default async (codestr: string, context: Context) => {
 
   // 处理模板
   if (template?.content) {
-    const staticsUrl = await templateParsing(template.content, context);
-    rsp.statics = staticsUrl;
+    const { statics } = await templateParsing(template.content, context);
+    rsp.statics = statics;
   }
 
   // 处理ts
@@ -33,7 +34,7 @@ export default async (codestr: string, context: Context) => {
   if (styles?.length) {
     // less
     const lessContents = new Set<string>();
-    const lessLinks = new Set<string>();
+    const links = new Set<string>();
 
     styles.forEach((style) => {
       const { lang, content, src } = style;
@@ -42,7 +43,7 @@ export default async (codestr: string, context: Context) => {
           lessContents.add(content);
         }
         if (src) {
-          lessLinks.add(src);
+          links.add(src);
         }
       }
     });
@@ -58,13 +59,18 @@ export default async (codestr: string, context: Context) => {
       rsp.statics = [...rsp.statics, ...statics];
     }
 
-    // less 链接样式
-    if (lessLinks.size) {
-      const imports = $utils.transfromFileUrl(context, lessLinks);
-      rsp.imports = [...rsp.imports, ...imports];
+    // url方式
+    if (links.size) {
+      const imports = new Set<string>();
+      links.forEach((url) => {
+        const rsp = $utils.transfromAliasOrRelativeUrl({ url });
+        setAddArrItem(imports, rsp);
+      });
+      rsp.imports = [...rsp.imports, ...Array.from(imports)];
     }
 
     $utils.addStaticUrl(rsp.statics);
   }
+
   return rsp;
 };
