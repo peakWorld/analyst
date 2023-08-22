@@ -58,11 +58,7 @@ export default class Main {
     }
 
     // delete this.context.migrates;
-    console.log(
-      'parsed',
-      // this.context,
-      this.context.migrates.size,
-    );
+    console.log('parsed', this.context);
     // saveToTmpFile('context.json', this.context);
   }
 
@@ -115,7 +111,7 @@ export default class Main {
       return null;
     }
 
-    // 文件已被处理过 | 文件 不在可处理区域中
+    // 文件已被处理过 | 文件不在可处理区域中
     if (parsed.has(fileUrl) || include.every((it) => !fileUrl.startsWith(it))) {
       return null;
     }

@@ -30,7 +30,11 @@ export interface TraverseContext {
 
 export interface GenContext {
   code: string;
+  currentIndent: number;
   push: (code: string) => void;
+  newline: () => void;
+  indent: () => void;
+  deIndent: () => void;
 }
 
 export default class TemplateAst {
@@ -41,7 +45,7 @@ export default class TemplateAst {
   code_str!: string;
 
   constructor(code_str: string) {
-    const { ast } = compiler.compile(code_str);
+    const { ast } = compiler.compile(code_str, { outputSourceRange: true });
     this.ast = this.addRoot(ast);
   }
 
@@ -130,11 +134,25 @@ export default class TemplateAst {
       push(code) {
         context.code += code;
       },
+      currentIndent: 0, // 缩进级别
+      // 换行, 在代码字符串后追加 \n 字符; 换行时保留缩进,追加 currentIndent*2个空格字符
+      newline() {
+        context.code += '\n' + '  '.repeat(context.currentIndent);
+      },
+      // 增加缩进
+      indent() {
+        context.currentIndent++;
+        context.newline();
+      },
+      // 取消缩进
+      deIndent() {
+        context.currentIndent--;
+        context.newline();
+      },
     };
 
     this.genNode(this.ast.children[0], context);
-
-    console.log('code', context.code);
+    // eslintHtml(context.code);
   }
 
   private genNode(node: ASTNode, context: GenContext) {
@@ -152,15 +170,24 @@ export default class TemplateAst {
           }
         });
       }
-      if (!node.children.length) {
+      const { children, scopedSlots } = node;
+
+      if (
+        !node.children.length &&
+        (!scopedSlots || !Object.keys(scopedSlots).length)
+      ) {
         context.push('/>');
       } else {
         context.push('>');
       }
 
-      // 子节点
-      if (node.children.length) {
-        node.children.forEach((n) => this.genNode(n, context));
+      // 子节点 或插槽
+      let waiting = [...children];
+      if (scopedSlots && Object.keys(scopedSlots).length) {
+        waiting = [...waiting, ...Object.values(scopedSlots)];
+      }
+      if (waiting.length) {
+        waiting.forEach((n) => this.genNode(n, context));
         context.push(`</${node.tag}>`);
       }
     }

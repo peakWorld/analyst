@@ -2,7 +2,7 @@ export function checkType(data: unknown) {
   return Object.prototype.toString.call(data).slice(8, -1).toLowerCase();
 }
 
-export function isObject(data: unknown): data is Record<string, any> {
+export function isObject<T = Record<string, any>>(data: unknown): data is T {
   return ['object'].includes(checkType(data));
 }
 

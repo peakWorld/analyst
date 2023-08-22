@@ -42,7 +42,7 @@ export default (codestr: string, context: Context) => {
       // saveToTmpFile('template.json', node);
       // console.vlog('node', node);
       return () => {
-        ast.generate();
+        // ast.generate();
 
         onBeforeExit();
       };

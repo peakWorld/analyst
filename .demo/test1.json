@@ -1,7 +1,0 @@
-{
-  "isVue": true,
-  "useVite": false,
-  "migrateImage": false,
-  "migrateStyle": true,
-  "stylePreprocess": "scss"
-}
