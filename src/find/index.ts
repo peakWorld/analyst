@@ -19,7 +19,7 @@ export default class FindCommand extends Command {
 
       注: 在项目工作区间执行命令。
     `,
-    examples: [[`基本例子`, `$0 stash -s xx`]],
+    examples: [[`基本例子`, `$0 stash -t xx`]],
   });
 
   async execute() {
