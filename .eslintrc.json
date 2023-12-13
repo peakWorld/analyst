@@ -26,6 +26,7 @@
     // disable it, or understand what it enforces.
     // https://typescript-eslint.io/rules/explicit-function-return-type/
     "@typescript-eslint/no-explicit-any": 0,
+    "no-prototype-builtins": 0,
     "semi": 2
   }
 }

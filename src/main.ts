@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import './libs/extends.js';
 
 import { Cli, Builtins } from 'clipanion';
 import StashCommand from './stash/command.js';
@@ -10,7 +11,7 @@ const [node, app, ...args] = process.argv;
 
 const cli = new Cli({
   binaryName: `sable`,
-  binaryLabel: `命令行工具`,
+  binaryLabel: `命令行工具: ${node} ${app}`,
   binaryVersion: `0.0.1`,
 });
 cli.register(Builtins.HelpCommand);

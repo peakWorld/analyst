@@ -1,7 +1,9 @@
 import { Command, Option } from 'clipanion';
 import Analyze from './analyze/index.js';
+import Logger from '../libs/log.js';
+import type { Context } from '../types/clipanion.js';
 
-export default class TrashCommand extends Command {
+export default class TrashCommand extends Command<Context> {
   entry = Option.String('-e,--entry', {
     description: '命令行相关配置文件',
   });
@@ -34,10 +36,7 @@ export default class TrashCommand extends Command {
   });
 
   async execute() {
-    new Analyze(this.entry);
-
-    this.context.stdout.write(
-      `TrashCommand: ${this.entry}，delete: ${this.delete}，migrate: ${this.migrate}`,
-    );
+    this.context.logger = new Logger(this.context, 'Find');
+    new Analyze(this.context, 'Analyze').setup();
   }
 }

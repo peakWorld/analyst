@@ -1,3 +1,7 @@
-import Base from '../base.js';
+import Base from '../../libs/base.js';
 
-export default class Analyze extends Base {}
+export default class Analyze extends Base {
+  setup() {
+    return this;
+  }
+}

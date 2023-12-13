@@ -1,6 +1,9 @@
 import { Command, Option } from 'clipanion';
+import Find from './index.js';
+import Logger from '../libs/log.js';
+import type { Context } from '../types/clipanion.js';
 
-export default class FindCommand extends Command {
+export default class FindCommand extends Command<Context> {
   text = Option.String('-t,--text', {
     required: true,
     description: '需要查找的文本',
@@ -23,6 +26,11 @@ export default class FindCommand extends Command {
   });
 
   async execute() {
-    this.context.stdout.write(`FindCommand: ${this.text}`);
+    this.context.logger = new Logger(this.context, 'Find');
+    new Find(this.context, 'Find').setup(this.text);
+  }
+
+  async catch(error: any) {
+    console.log('error', error);
   }
 }
