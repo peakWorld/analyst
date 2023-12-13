@@ -1,9 +1,10 @@
 import { Command, Option } from 'clipanion';
-import Find from './index.js';
-import Logger from '../libs/log.js';
-import type { Context } from '../types/clipanion.js';
+import FindHandler from './index.js';
+import BaseCommand from '../libs/bases/command.js';
 
-export default class FindCommand extends Command<Context> {
+const commandKey = 'Find'; // 项目配置文件名(小写)
+
+export default class FindCommand extends BaseCommand {
   text = Option.String('-t,--text', {
     required: true,
     description: '需要查找的文本',
@@ -26,11 +27,8 @@ export default class FindCommand extends Command<Context> {
   });
 
   async execute() {
-    this.context.logger = new Logger(this.context, 'Find');
-    new Find(this.context, 'Find').setup(this.text);
-  }
+    this.setup(commandKey); // 初始化
 
-  async catch(error: any) {
-    console.log('error', error);
+    new FindHandler(this.context, commandKey).setup(this.text); // 执行逻辑
   }
 }

@@ -18,6 +18,16 @@ export default class CheckTye {
     ].includes(this.checkType(data));
   }
 
+  static isNotEmpty(data: unknown) {
+    return ['string', 'number', 'boolean', 'symbol'].includes(
+      this.checkType(data),
+    );
+  }
+
+  static isEmpty(data: unknown) {
+    return ['null', 'undefined'].includes(this.checkType(data));
+  }
+
   static isNumber(data: unknown): data is number {
     return ['number'].includes(this.checkType(data));
   }
@@ -34,7 +44,7 @@ export default class CheckTye {
     return ['map'].includes(this.checkType(data));
   }
 
-  static isFunc(data: unknown) {
+  static isFunc(data: unknown): data is () => void {
     return ['function', 'asyncfunction'].includes(this.checkType(data));
   }
 

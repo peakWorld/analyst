@@ -19,7 +19,7 @@ declare global {
   }
 
   // 扩展语法
-  type Optinonal<T> = T | undefined | null;
+  type Optinonal<T> = T extends any[] ? [] | T : T | undefined | null;
 
   // 扩展Prototype
   type AnyObj = Record<string, any>;
@@ -31,20 +31,15 @@ declare global {
     /** 合并对象(返回新对象) */
     merge_: <T extends AnyObj>(args: T[]) => any; // TODO
 
-    /** 批量修改对象中的值(修改原对象) */
-    _map: <T extends AnyObj>(cb: (k: keyof T) => any, v?: T[keyof T]) => T;
-
     /** 批量修改对象中的值(返回新对象) */
+    _map: <T extends AnyObj>(cb: (v: T[keyof T], k?: keyof T) => any) => T;
+
+    /** 批量修改对象中的值 */
     _forEach: <T extends AnyObj>(
-      cb: (k: keyof T) => any,
-      v?: T[keyof T],
+      cb: (v: T[keyof T], k?: keyof T) => any,
     ) => void;
 
-    /**
-     *  获取属性(根据k模糊匹配, 最先匹配到的)
-     *
-     *  cb(objectKey, paramKey) => boolean
-     * */
+    /** 获取属性(根据k模糊匹配, 最先匹配到的) */
     _get: (
       k: string,
       cb?: (v: string, k?: string) => boolean,

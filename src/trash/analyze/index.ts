@@ -1,6 +1,6 @@
-import Base from '../../libs/base.js';
+import BaseHandler from '../../libs/bases/handler.js';
 
-export default class Analyze extends Base {
+export default class AnalyzeHandler extends BaseHandler {
   setup() {
     return this;
   }

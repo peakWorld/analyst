@@ -8,24 +8,20 @@ export interface SableConfigs {
 }
 
 // 解析后配置
-export interface ResolvedCss {
-  global: string[];
-  scss: boolean;
-  less: boolean;
-}
-
 export interface ResolvedFrame {
   uniapp: boolean;
 
   vue2: boolean;
   vue3: boolean;
   react: boolean;
+
+  scss: boolean;
+  less: boolean;
 }
 
 export interface SableResolvedConfigs {
   entry: string[];
   route: Record<string, string>;
   frame: Partial<ResolvedFrame>;
-  css: Partial<ResolvedCss>;
   alias: Record<string, string>;
 }

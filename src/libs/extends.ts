@@ -20,14 +20,16 @@ Object.prototype.merge_ = function (objs) {
 Object.prototype._forEach = function (cb) {
   for (const k in this) {
     if (!hasOwn.call(this, k)) continue;
-    this[k] = cb(this[k]);
+    cb(this[k], k);
   }
 };
 
 Object.prototype._map = function (cb) {
   const result = {};
-  result._merge([this]);
-  result._forEach(cb);
+  for (const k in this) {
+    if (!hasOwn.call(this, k)) continue;
+    result[k] = cb(this[k], k);
+  }
   return result as any;
 };
 
@@ -37,9 +39,9 @@ Object.prototype._get = function (search, cb) {
   }
   for (const tk in this) {
     if (!hasOwn.call(this, tk)) continue;
-    if (cb(this[tk])) return [this[tk], tk];
+    if (cb(this[tk], tk)) return [this[tk], tk];
   }
-  return undefined;
+  return [];
 };
 
 Object.prototype._filter = function (ks) {

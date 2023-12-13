@@ -1,4 +1,5 @@
 import t from './check-type.js';
+import { ResolvedFrame } from '../types/libs.js';
 
 export function upperFirstCase(str: string) {
   return str.slice(0, 1).toLocaleUpperCase() + str.slice(1);
@@ -16,15 +17,22 @@ export function proxy<T extends Record<string | symbol, any>>(target: T): T {
   });
 }
 
-// 加载动态模块
-export async function loadDynamicModule<T>(moduleUrl: string) {
-  return (await import(moduleUrl)).default as T;
-}
-
 // 从package.json获取模块版本
 export function getVersion(version: string) {
   const [_, v] = /^[~^]?(\d)/.exec(version);
   return Number(v);
+}
+
+export function isTsFile(fileName: string) {
+  return fileName.endsWith('.ts') || fileName.endsWith('.d.ts');
+}
+
+// 处理css文件, 可能携带～前缀
+export function replaceAliasCss(alias: Record<string, string>, url: string) {
+  if (url.startsWith('~')) {
+    url = url.slice(1);
+  }
+  return replaceAlias(alias, url);
 }
 
 // 根据alias, 将url替换成绝对路径
@@ -44,6 +52,30 @@ export function replaceAlias(alias: Record<string, string>, url: string) {
 
   const aliasTmp = alias.filter_(['@', '~']);
   const [v, k] = aliasTmp._get(url, (v) => url.startsWith(v));
+
+  if (!v) return '';
+
   url = url.replace(k, v);
   return url;
+}
+
+export function getMatchExtname(frame: ResolvedFrame, matchCss = false) {
+  let exts = [];
+  if (matchCss) {
+    if (frame.less) {
+      exts = [...exts, 'less'];
+    }
+    if (frame.scss) {
+      exts = [...exts, 'scss', 'sass'];
+    }
+    return exts;
+  }
+  exts = ['ts', 'js'];
+  if (frame.react) {
+    exts = [...exts, 'tsx', 'jsx'];
+  }
+  if (frame.vue2 || frame.vue3) {
+    exts = [...exts, 'vue'];
+  }
+  return exts;
 }
