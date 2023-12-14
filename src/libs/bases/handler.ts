@@ -24,11 +24,10 @@ export default class BaseHandler {
 
   protected pkgJson!: PackageJson;
 
-  constructor(private ctx: Context, private fileName: string) {
+  constructor(protected ctx: Context) {
     this.ctx.logger.log(`Class Entity Created!`);
     this.pkgJson = getWkPkgJson();
     this.ctx.appeared = new Set();
-    this.ctx.handlers = [];
   }
 
   async initCommandConfigs() {
@@ -42,7 +41,7 @@ export default class BaseHandler {
     const sourceUrl = path.join(
       wkspace,
       '.cache',
-      `${this.fileName.toLowerCase()}.ts`,
+      `${this.ctx.key.toLowerCase()}.ts`,
     );
     const destUrl = path.join(space, '.cache', `${wkName}.ts`);
     const templateUrl = path.join(space, '.cache', 'template.ts');
@@ -115,7 +114,7 @@ export default class BaseHandler {
     alias: Record<string, string>,
   ) {
     const { route } = this.commandConfigs;
-    // if (t.isObject(route)) return route; // is关键字未生效? TODO
+    // if (t.isObject(route)) return route; // TODO is关键字未生效?
     if (!t.isArray(route)) return route; // 对象直接返回
 
     let moduleKey = 'default';

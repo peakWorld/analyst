@@ -9,6 +9,11 @@ export default abstract class BaseRoute {
 
   abstract getRoutes(): Promise<any>;
 
+  /**
+   * 真实路由 路径 => 文件地址
+   * 虚拟路由 virtual:x => 文件地址
+   *
+   */
   protected routes!: Record<string, string>;
 
   protected macthExt!: string[];

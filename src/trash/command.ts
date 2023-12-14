@@ -1,6 +1,6 @@
 import { Command, Option } from 'clipanion';
-import Analyze from './analyze/index.js';
-import Logger from '../libs/log.js';
+// import Analyze from './analyze/index.js';
+// import Logger from '../libs/log.js';
 import type { Context } from '../types/clipanion.js';
 
 export default class TrashCommand extends Command<Context> {
@@ -36,7 +36,7 @@ export default class TrashCommand extends Command<Context> {
   });
 
   async execute() {
-    this.context.logger = new Logger(this.context, 'Find');
-    new Analyze(this.context, 'Analyze').setup();
+    // this.context.logger = new Logger(this.context, 'Find');
+    // new Analyze(this.context, 'Analyze').setup();
   }
 }

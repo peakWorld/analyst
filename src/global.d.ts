@@ -29,7 +29,7 @@ declare global {
     _merge: <T extends AnyObj>(args: T[]) => void;
 
     /** 合并对象(返回新对象) */
-    merge_: <T extends AnyObj>(args: T[]) => any; // TODO
+    merge_: <T extends AnyObj>(args: T[]) => any; // TODO ts
 
     /** 批量修改对象中的值(返回新对象) */
     _map: <T extends AnyObj>(cb: (v: T[keyof T], k?: keyof T) => any) => T;
@@ -43,12 +43,12 @@ declare global {
     _get: (
       k: string,
       cb?: (v: string, k?: string) => boolean,
-    ) => Optinonal<[any, string]>; // TODO
+    ) => Optinonal<[any, string]>; // TODO ts
 
     /** 过滤属性(修改原对象) */
-    _filter: <T extends AnyObj, K extends Array<keyof T>>(k: K) => void; // TODO
+    _filter: <T extends AnyObj, K extends Array<keyof T>>(k: K) => void; // TODO ts
 
     /** 过滤属性(返回新对象) */
-    filter_: <T extends AnyObj, K extends Array<keyof T>>(k: K) => AnyObj; // TODO
+    filter_: <T extends AnyObj, K extends Array<keyof T>>(k: K) => AnyObj; // TODO ts
   }
 }

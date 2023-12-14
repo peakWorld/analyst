@@ -9,5 +9,6 @@ export default class FindHandler extends BaseHandler {
   async setup(text: string) {
     if (!text) throw new Error('查询条件为空!');
     await super.initCommandConfigs();
+    console.log('ctx', this.ctx.configs);
   }
 }

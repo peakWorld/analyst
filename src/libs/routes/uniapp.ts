@@ -7,22 +7,52 @@ import {
   readFileToExcuteJs,
   readFileToJson,
   replaceAlias,
+  wkspace,
+  matchFileAbsUrls,
 } from '../../utils/index.js';
-import { RouteHandlerType } from '../../types/clipanion.js';
+import { RegexRouteType } from '../../types/clipanion.js';
 
 export interface UniappConfig {
-  easycom: {
-    custom: Record<string, string>;
+  easycom?: {
+    custom?: Record<string, string>;
   };
   pages: Array<{ path: string }>;
   subPackages: Array<{
     root: string;
     pages: Array<{ path: string }>;
   }>;
+  globalStyle?: {
+    usingComponents?: Record<string, string>;
+  };
+  tabBar?: {
+    iconfontSrc?: string;
+    list?: Array<{
+      pagePath: string;
+      iconPath: string;
+      selectedIconPath: string;
+    }>;
+    midButton?: {
+      iconPath: string;
+      backgroundImage: string;
+    };
+  };
+  topWindow?: {
+    path: string;
+  };
+  leftWindow?: {
+    path: string;
+  };
+  rightWindow?: {
+    path: string;
+  };
 }
 
 export default class UniappRoute extends BaseRoute {
   private original!: UniappConfig; // 原始路由配置
+
+  private setAbsUrl(v: string) {
+    return path.join(wkspace, 'src', v);
+  }
 
   async setup(urls: string[]) {
     let jsonFileUrl = '';
@@ -42,22 +72,41 @@ export default class UniappRoute extends BaseRoute {
 
   // uniapp 特殊配置
   async resolveEasycom() {
-    const { easycom } = this.original;
-    easycom?.custom?._forEach((v, k) => {
+    this.original?.easycom?.custom?._forEach((v, k) => {
       const absUrl = replaceAlias(this.alias, v);
       if (!absUrl) return;
+      this.routes[`regex:${RegexRouteType.Tag}::${k}`] = v;
+    });
+  }
 
-      const handler = (...matches: string[]) => {
-        matches.forEach((match, i) => {
-          v = v.replace(`$${i + 1}`, match);
-        });
-        return v;
-      };
-      this.ctx.handlers.push({
-        regex: new RegExp(`${k}`),
-        type: RouteHandlerType.Tag,
-        handler,
-      });
+  async resolveOther() {
+    // TODO 静态文件未处理
+
+    // 微信原生组建
+    this.original?.globalStyle?.usingComponents?._forEach((v) => {
+      if (v.startsWith('/')) {
+        v = v.slice(1);
+      }
+      this.setAbsUrl(v); // TODO 微信原生开发解析
+      // const absUrls = matchFileAbsUrlsInWx(vTmp, ['vue']);
+    });
+
+    // tabBar
+    this.original?.tabBar?.list.forEach(({ pagePath: v }) => {
+      const absUrl = matchFileAbsUrls(this.setAbsUrl(v), this.macthExt)[0];
+      if (!absUrl) throw new Error(`tabBar路径"${v}"没有找到对应入口文件`);
+      this.routes[v] = absUrl;
+    });
+
+    // windows
+    const windows = {
+      topWindow: this.original?.topWindow?.path,
+      leftWindow: this.original?.leftWindow?.path,
+      rightWindow: this.original?.rightWindow?.path,
+    };
+    windows._forEach((v, k) => {
+      if (!v) return;
+      this.routes[`virtual:uniapp-${k}`] = this.setAbsUrl(v);
     });
   }
 
@@ -68,16 +117,17 @@ export default class UniappRoute extends BaseRoute {
     subPackages?.forEach(({ root, pages }) => {
       pages?.forEach((v) => routeTmp.push(path.join(root, v.path)));
     });
-    // routeTmp.forEach((v) => {});
-    console.log('macthExt', this.macthExt);
+    routeTmp.forEach((v) => {
+      const absUrl = matchFileAbsUrls(this.setAbsUrl(v), this.macthExt)[0];
+      if (!absUrl) throw new Error(`路由"${v}"没有找到对应入口文件`);
+      this.routes[v] = absUrl;
+    });
   }
-
-  async resolveOther() {}
 
   async getRoutes() {
     await this.resolveEasycom();
-    await this.resolvePages();
     await this.resolveOther();
+    await this.resolvePages();
     return this.routes;
   }
 }

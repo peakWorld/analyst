@@ -1,3 +1,4 @@
+import fs from 'fs-extra';
 import t from './check-type.js';
 import { ResolvedFrame } from '../types/libs.js';
 
@@ -60,17 +61,18 @@ export function replaceAlias(alias: Record<string, string>, url: string) {
 }
 
 export function getMatchExtname(frame: ResolvedFrame, matchCss = false) {
-  let exts = [];
   if (matchCss) {
+    let exts = ['css'];
     if (frame.less) {
       exts = [...exts, 'less'];
     }
     if (frame.scss) {
-      exts = [...exts, 'scss', 'sass'];
+      exts = [...exts, 'scss'];
     }
     return exts;
   }
-  exts = ['ts', 'js'];
+
+  let exts = ['ts', 'js'];
   if (frame.react) {
     exts = [...exts, 'tsx', 'jsx'];
   }
@@ -78,4 +80,29 @@ export function getMatchExtname(frame: ResolvedFrame, matchCss = false) {
     exts = [...exts, 'vue'];
   }
   return exts;
+}
+
+// 根据路径和文件后缀 查找相应的系统文件
+export function matchFileAbsUrls(fileUrl: string, exts: string[]) {
+  // 路径存在
+  if (fs.existsSync(fileUrl)) {
+    const stat = fs.lstatSync(fileUrl);
+    if (stat.isDirectory()) {
+      return matchFileAbsUrls(`${fileUrl}/index`, exts);
+    }
+    return fileUrl;
+  }
+
+  return exts
+    .filter((v) => fs.existsSync(`${fileUrl}.${v}`))
+    .map((v) => `${fileUrl}.${v}`);
+}
+
+// 原生微信开发查找逻辑
+export function matchFileAbsUrlsInWx(fileUrl: string, extraExts?: string[]) {
+  let exts = ['js', 'json', 'wxss', 'wxml', 'wxs'];
+  if (extraExts?.length) {
+    exts = [...exts, ...extraExts];
+  }
+  return matchFileAbsUrls(fileUrl, exts);
 }

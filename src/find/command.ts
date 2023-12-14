@@ -1,8 +1,7 @@
 import { Command, Option } from 'clipanion';
 import FindHandler from './index.js';
 import BaseCommand from '../libs/bases/command.js';
-
-const commandKey = 'Find'; // 项目配置文件名(小写)
+import { CommandKey } from '../types/clipanion.js';
 
 export default class FindCommand extends BaseCommand {
   text = Option.String('-t,--text', {
@@ -27,8 +26,7 @@ export default class FindCommand extends BaseCommand {
   });
 
   async execute() {
-    this.setup(commandKey); // 初始化
-
-    new FindHandler(this.context, commandKey).setup(this.text); // 执行逻辑
+    this.setup(CommandKey.FIND);
+    new FindHandler(this.context).setup(this.text); // 执行逻辑
   }
 }
