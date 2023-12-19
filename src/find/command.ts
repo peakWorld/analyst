@@ -1,14 +1,9 @@
 import { Command, Option } from 'clipanion';
 import FindHandler from './index.js';
 import BaseCommand from '../libs/bases/command.js';
-import { CommandKey } from '../types/clipanion.js';
+import { CommandKey } from '../types/constant.js';
 
 export default class FindCommand extends BaseCommand {
-  text = Option.String('-t,--text', {
-    required: true,
-    description: '需要查找的文本',
-  });
-
   static paths = [[`find`]];
 
   static usage = Command.Usage({
@@ -23,6 +18,11 @@ export default class FindCommand extends BaseCommand {
       注: 在项目工作区间执行命令。
     `,
     examples: [[`基本例子`, `$0 stash -t xx`]],
+  });
+
+  text = Option.String('-t,--text', {
+    required: true,
+    description: '需要查找的文本',
   });
 
   async execute() {

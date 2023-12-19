@@ -4,18 +4,6 @@ import { Command, Option } from 'clipanion';
 import type { Context } from '../types/clipanion.js';
 
 export default class TrashCommand extends Command<Context> {
-  entry = Option.String('-e,--entry', {
-    description: '命令行相关配置文件',
-  });
-
-  delete = Option.Boolean('-d,--delete', false, {
-    description: '删除无用文件',
-  });
-
-  migrate = Option.Boolean('-m,--migrate', false, {
-    description: '迁移目录文件',
-  });
-
   static paths = [[`trash`]];
 
   static usage = Command.Usage({
@@ -33,6 +21,18 @@ export default class TrashCommand extends Command<Context> {
       [`删除无用文件`, `$0 trash -e xx -d`],
       [`迁移目录文件`, `$0 trash -e xx -m`],
     ],
+  });
+
+  entry = Option.String('-e,--entry', {
+    description: '命令行相关配置文件',
+  });
+
+  delete = Option.Boolean('-d,--delete', false, {
+    description: '删除无用文件',
+  });
+
+  migrate = Option.Boolean('-m,--migrate', false, {
+    description: '迁移目录文件',
   });
 
   async execute() {

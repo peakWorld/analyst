@@ -2,7 +2,9 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import fs from 'fs-extra';
 import esbuild from 'esbuild';
-import { wkspace } from './constant.js';
+import { wkspace, space } from './constant.js';
+import { stringifyWithCircular } from './common.js';
+import t from './check-type.js';
 
 const _require = createRequire(import.meta.url);
 
@@ -59,4 +61,15 @@ export async function readFileToExcuteJs(fileUrl: string, isEsm = true) {
   } else {
     return await loadDynamicModule<any>(fileUrl, false);
   }
+}
+
+export function saveDataToTmpJsonFile(data: string | AnyObj, fileUrl?: string) {
+  const str = t.isObject(data) ? stringifyWithCircular(data) : data;
+  if (!fileUrl) {
+    fileUrl = `timestamp-${Date.now()}-${Math.random()}`;
+  }
+  const dirUrl = path.join(space, `./.tmp`);
+
+  fs.ensureDirSync(dirUrl);
+  fs.writeFileSync(`${dirUrl}/${fileUrl}.json`, str);
 }

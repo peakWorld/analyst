@@ -20,17 +20,6 @@ export default class BaseHandler {
 
   protected pkgJson!: PackageJson;
 
-  constructor(protected ctx: Context) {
-    this.ctx.logger.log(`Class Entity Created!`);
-    this.pkgJson = getWkPkgJson();
-    this.ctx.appeared = new Set();
-  }
-
-  async initCommandConfigs() {
-    await this.loadCommandConfigFile(); // 加载 command config文件
-    await this.resolveCommandConfig(); // 解析 command config
-  }
-
   protected async loadCommandConfigFile() {
     this.ctx.logger.log(`Loading Command Configs!`);
     // 读取项目相关配置
@@ -59,7 +48,10 @@ export default class BaseHandler {
   }
 
   protected async resolveCommandConfig() {
+    if (!this.commandConfigs) return;
+
     this.ctx.logger.log(`Resolving Command Configs!`);
+
     const { entry, styles } = this.commandConfigs;
 
     const alias = await this.resolveAlias();
@@ -87,7 +79,7 @@ export default class BaseHandler {
     return alias._map<typeof alias>((v) => fs.realpathSync(v));
   }
 
-  protected async resolveFrame(): Promise<ResolvedFrame> {
+  protected async resolveFrame(): Promise<Partial<ResolvedFrame>> {
     const commadnFrames = this.commandConfigs.frames;
     const { dependencies, devDependencies } = this.pkgJson;
     const deps = dependencies.merge_([devDependencies]);
@@ -106,7 +98,7 @@ export default class BaseHandler {
   }
 
   protected async resolveRoute(
-    frames: ResolvedFrame,
+    frames: Partial<ResolvedFrame>,
     alias: Record<string, string>,
   ) {
     const { routes } = this.commandConfigs;
@@ -124,5 +116,16 @@ export default class BaseHandler {
     const router = new Router(this.ctx, alias, frames);
     await router.setup(routes.map((v) => fs.realpathSync(v)));
     return await router.getRoutesAndHandlers();
+  }
+
+  constructor(protected ctx: Context) {
+    this.ctx.logger.log(`Class Entity Created!`);
+    this.pkgJson = getWkPkgJson();
+    this.ctx.appeared = new Set();
+  }
+
+  async initCommandConfigs() {
+    await this.loadCommandConfigFile(); // 加载 command config文件
+    await this.resolveCommandConfig(); // 解析 command config
   }
 }

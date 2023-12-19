@@ -10,6 +10,27 @@
 ## 模块
 [clipanion](https://github.com/arcanis/clipanion)
 
-## 参考文献
-* [NodeJS 多进程编程](https://0x98k.com/2022-04-17-process-cluster#3849a16265f84f7cbd1533beb5101744)
-* [Babel Handbook](https://github.com/jamiebuilds/babel-handbook/blob/master/translations/zh-Hans/README.md)
+## Class
+```ts
+class Test {
+  // 静态变量
+  private static st1;
+  static st2;
+
+  // 私有｜受保护｜公有变量
+  private t1;
+  protected t2;
+  t3;
+
+  // 私有｜受保护函数
+  private tb1() {}
+  protected tb2() {}
+
+  // 构造函数
+  constructor() {}
+
+  // 公有函数
+  tb3() {}
+  async tb4() {}
+}
+```

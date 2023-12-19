@@ -13,7 +13,6 @@ coverage
 build/
 
 # VS Code
-.vscode
 !.vscode/tasks.js
 
 # JetBrains IDEs
@@ -28,7 +27,10 @@ build/
 # Misc
 .DS_Store
 
-.env
-.tmp
+.tmp/
+.cache/
+*.old/
 
-*.old
+*.back
+!.cache/template.ts
+

@@ -8,7 +8,7 @@ export default (ctx) => {
     frames: ['uniapp'],
 
     // 样式处理 数组 [全局样式文件]
-    css: ['~@/uni.scss'],
+    styles: ['~@/uni.scss'],
 
     // 路径别名 TODO
     alias: {

@@ -10,7 +10,7 @@ import {
   wkspace,
   matchFileAbsUrls,
 } from '../../utils/index.js';
-import { MatchHandlerType } from '../../types/clipanion.js';
+import { MatchHandlerType } from '../../types/constant.js';
 
 export interface UniappConfig {
   easycom?: {
@@ -93,7 +93,7 @@ export default class UniappRoute extends BaseRoute {
     // TODO 静态文件未处理
 
     // 微信原生组建
-    this.original?.globalStyle?.usingComponents?._forEach((v) => {
+    this.original?.globalStyle?.usingComponents?._forEach(() => {
       // TODO 微信原生开发解析
       // if (v.startsWith('/')) {
       //   v = v.slice(1);

@@ -1,5 +1,6 @@
 import { Command, Option } from 'clipanion';
-import type { Context, CommandKey } from '../../types/clipanion.js';
+import type { Context } from '../../types/clipanion.js';
+import type { CommandKey } from '../../types/constant.js';
 import Logger from '../log.js';
 
 export default abstract class BaseCommand extends Command<Context> {

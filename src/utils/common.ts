@@ -60,7 +60,10 @@ export function replaceAlias(alias: Record<string, string>, url: string) {
   return url;
 }
 
-export function getMatchExtname(frame: ResolvedFrame, matchCss = false) {
+export function getMatchExtname(
+  frame: Partial<ResolvedFrame>,
+  matchCss = false,
+) {
   if (matchCss) {
     let exts = ['css'];
     if (frame.less) {
@@ -105,4 +108,30 @@ export function matchFileAbsUrlsInWx(fileUrl: string, extraExts?: string[]) {
     exts = [...exts, ...extraExts];
   }
   return matchFileAbsUrls(fileUrl, exts);
+}
+
+export function checkIsFileUrl(codeOrUrl: string, exts: string[]) {
+  return new RegExp(`.+\\.(${exts.join('|')})$`).test(codeOrUrl);
+}
+
+// 处理循环引用对象
+export function stringifyWithCircular(obj: AnyObj) {
+  let cache = [];
+  const str = JSON.stringify(obj, (_, value) => {
+    if (t.isObject(value) && value !== null) {
+      if (cache.includes(value)) return;
+      cache.push(value);
+    }
+    if (t.isMap(value)) {
+      const record = {};
+      Array.from(value.keys()).forEach((k) => (record[k] = value.get(k)));
+      return record;
+    }
+    if (t.isSet(value)) {
+      return Array.from(value);
+    }
+    return value;
+  });
+  cache = [];
+  return str;
 }

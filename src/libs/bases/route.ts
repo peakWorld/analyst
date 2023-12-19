@@ -26,7 +26,7 @@ export default abstract class BaseRoute {
   constructor(
     protected ctx: RouteContext,
     protected alias: Record<string, string>,
-    protected frame: ResolvedFrame,
+    protected frame: Partial<ResolvedFrame>,
   ) {
     this.routes = {};
     this.handlers = [];
@@ -39,6 +39,6 @@ export interface IBaseRoute {
   new (
     ctx: RouteContext,
     alias: Record<string, string>,
-    frame: ResolvedFrame,
+    frame: Partial<ResolvedFrame>,
   ): BaseRoute;
 }
