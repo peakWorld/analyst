@@ -44,6 +44,13 @@ Object.prototype._get = function (search, cb) {
   return [];
 };
 
+Object.prototype._getRandom = function () {
+  const keys = Object.keys(this);
+  const len = keys.length;
+  const i = Math.floor(Math.random() * len);
+  return this[keys[i]];
+};
+
 Object.prototype._filter = function (ks) {
   for (const k in this) {
     if (!hasOwn.call(this, k)) continue;
@@ -62,4 +69,14 @@ Object.prototype.filter_ = function (ks) {
     }
   }
   return result;
+};
+
+Object.prototype[Symbol.iterator] = function () {
+  const keys = Object.keys(this);
+  let i = 0;
+  return {
+    next() {
+      return { done: i >= keys.length, value: keys[i++] };
+    },
+  };
 };

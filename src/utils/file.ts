@@ -23,7 +23,10 @@ export function readFileToJson<T>(fileUrl: string): Optinonal<T> {
 }
 
 // 加载动态模块(esm|cjs)
-export async function loadDynamicModule<T>(moduleUrl: string, isEsm: boolean) {
+export async function loadDynamicModule<T>(
+  moduleUrl: string,
+  isEsm: boolean,
+): Promise<T> {
   if (isEsm) return (await import(moduleUrl)).default as T;
   return _require(moduleUrl); // (默认)可加载.js|.json|.node文件
 }
@@ -54,6 +57,6 @@ export async function readFileToExcuteJs(fileUrl: string, isEsm = true) {
       fs.unlink(fileUrlTmp);
     }
   } else {
-    return await loadDynamicModule(fileUrl, false);
+    return await loadDynamicModule<any>(fileUrl, false);
   }
 }

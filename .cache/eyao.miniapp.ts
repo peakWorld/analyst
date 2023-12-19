@@ -2,13 +2,13 @@ export default (ctx) => {
 
   return {
     entry: ['./src/main.js'],
-    route: ['./src/pages.json', './src/pages.js'],
+    routes: ['./src/pages.json', './src/pages.js'],
 
     // 框架
-    frame: ['uniapp'],
+    frames: ['uniapp'],
 
     // 样式处理 数组 [全局样式文件]
-    css: ['~@/uni.scss', '@api/xxx.css'],
+    css: ['~@/uni.scss'],
 
     // 路径别名 TODO
     alias: {

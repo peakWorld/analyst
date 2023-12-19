@@ -11,11 +11,7 @@ import {
   replaceAliasCss,
   t,
 } from '../../utils/index.js';
-import type {
-  SableConfigs,
-  SableResolvedConfigs,
-  ResolvedFrame,
-} from '../../types/libs.js';
+import type { SableConfigs, ResolvedFrame } from '../../types/libs.js';
 import type { Context } from '../../types/clipanion.js';
 import type { IBaseRoute } from './route.js';
 
@@ -64,26 +60,26 @@ export default class BaseHandler {
 
   protected async resolveCommandConfig() {
     this.ctx.logger.log(`Resolving Command Configs!`);
-    const { entry, css: globalCss } = this.commandConfigs;
+    const { entry, styles } = this.commandConfigs;
 
     const alias = await this.resolveAlias();
-    const frame = await this.resolveFrame();
+    const frames = await this.resolveFrame();
+    const { routes, handlers } = await this.resolveRoute(frames, alias);
 
-    const configs: SableResolvedConfigs = {
-      alias,
-      frame,
+    this.ctx.configs = {
       entry: entry?.map((v) => fs.realpathSync(v)) ?? [],
-      route: await this.resolveRoute(frame, alias),
+      alias,
+      frames,
+      handlers,
+      routes,
     };
 
-    this.ctx.configs = configs;
-
     // 处理全局样式文件
-    globalCss?.forEach((v) => {
+    styles?.forEach((v) => {
       this.ctx.appeared.add(replaceAliasCss(alias, v));
     });
 
-    this.ctx.logger.log(`Resolved Command Configs!`, configs);
+    this.ctx.logger.log(`Resolved Command Configs!`, this.ctx.configs);
   }
 
   protected async resolveAlias() {
@@ -92,41 +88,41 @@ export default class BaseHandler {
   }
 
   protected async resolveFrame(): Promise<ResolvedFrame> {
-    const commadnFrame = this.commandConfigs.frame;
+    const commadnFrames = this.commandConfigs.frames;
     const { dependencies, devDependencies } = this.pkgJson;
     const deps = dependencies.merge_([devDependencies]);
-    const frame = {} as ResolvedFrame;
+    const frames = {} as ResolvedFrame;
     if (deps.vue) {
       const v = getVersion(deps.vue);
-      frame[`vue${v}`] = true;
+      frames[`vue${v}`] = true;
     }
     return {
-      ...frame,
+      ...frames,
       react: !!deps.react,
-      uniapp: commadnFrame.includes('uniapp'),
+      uniapp: commadnFrames.includes('uniapp'),
       less: !!(deps.less || deps['less-loader']),
       scss: !!(deps.sass || deps['sass-loader']),
     };
   }
 
   protected async resolveRoute(
-    frame: ResolvedFrame,
+    frames: ResolvedFrame,
     alias: Record<string, string>,
   ) {
-    const { route } = this.commandConfigs;
+    const { routes } = this.commandConfigs;
     // if (t.isObject(route)) return route; // TODO is关键字未生效?
-    if (!t.isArray(route)) return route; // 对象直接返回
+    if (!t.isArray(routes)) return { routes, handlers: [] }; // 对象直接返回
 
     let moduleKey = 'default';
-    if (frame.uniapp) {
+    if (frames.uniapp) {
       moduleKey = 'uniapp';
     }
     const Router = await loadDynamicModule<IBaseRoute>(
       `../libs/routes/${moduleKey}.js`,
       true,
     );
-    const router = new Router(this.ctx, alias, frame);
-    await router.setup(route.map((v) => fs.realpathSync(v)));
-    return await router.getRoutes();
+    const router = new Router(this.ctx, alias, frames);
+    await router.setup(routes.map((v) => fs.realpathSync(v)));
+    return await router.getRoutesAndHandlers();
   }
 }

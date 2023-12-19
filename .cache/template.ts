@@ -3,14 +3,14 @@ export default () => {
     entry: [],
 
     // 路由处理 数组 [路由入口文件]; 对象 路由配置对象
-    route: [],
+    routes: [],
     // route: {},
 
     // 框架 uniapp
-    frame: [],
+    frames: [],
 
     // 样式处理 数组 [全局样式文件]
-    css: [],
+    styles: [],
 
     // 路径别名 TODO
     alias: {},

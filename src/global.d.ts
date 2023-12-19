@@ -45,10 +45,16 @@ declare global {
       cb?: (v: string, k?: string) => boolean,
     ) => Optinonal<[any, string]>; // TODO ts
 
+    /** 获取随机值 */
+    _getRandom: () => any;
+
     /** 过滤属性(修改原对象) */
     _filter: <T extends AnyObj, K extends Array<keyof T>>(k: K) => void; // TODO ts
 
     /** 过滤属性(返回新对象) */
     filter_: <T extends AnyObj, K extends Array<keyof T>>(k: K) => AnyObj; // TODO ts
+
+    /** 可迭代 */
+    [Symbol.iterator](): { next(): { done: boolean; value: any } };
   }
 }

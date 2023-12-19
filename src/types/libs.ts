@@ -1,9 +1,9 @@
 // 项目命令行配置
 export interface SableConfigs {
   entry: string[];
-  route: string[] | Record<string, string>;
-  frame: string[]; // uniapp|nextjs
-  css: Array<string>; // 全局样式文件
+  routes: string[] | Record<string, string>;
+  frames: string[]; // uniapp|nextjs
+  styles: Array<string>; // 全局样式文件
   alias: Record<string, string>;
 }
 
@@ -21,7 +21,7 @@ export interface ResolvedFrame {
 
 export interface SableResolvedConfigs {
   entry: string[];
-  route: Record<string, string>;
-  frame: Partial<ResolvedFrame>;
+  routes: Record<string, string>;
+  frames: Partial<ResolvedFrame>;
   alias: Record<string, string>;
 }

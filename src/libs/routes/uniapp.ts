@@ -10,7 +10,7 @@ import {
   wkspace,
   matchFileAbsUrls,
 } from '../../utils/index.js';
-import { RegexRouteType } from '../../types/clipanion.js';
+import { MatchHandlerType } from '../../types/clipanion.js';
 
 export interface UniappConfig {
   easycom?: {
@@ -65,6 +65,7 @@ export default class UniappRoute extends BaseRoute {
         jsFileUrl = url;
       }
     });
+    // TODO 错误处理
     const jsFunc = await readFileToExcuteJs(jsFileUrl, false);
     const json = await readFileToJson(jsonFileUrl);
     this.original = jsFunc(json);
@@ -75,7 +76,16 @@ export default class UniappRoute extends BaseRoute {
     this.original?.easycom?.custom?._forEach((v, k) => {
       const absUrl = replaceAlias(this.alias, v);
       if (!absUrl) return;
-      this.routes[`regex:${RegexRouteType.Tag}::${k}`] = v;
+      this.handlers.push({
+        type: MatchHandlerType.Tag,
+        match: new RegExp(`${k}`),
+        handler: (...matches: string[]) => {
+          matches?.forEach((match, i) => {
+            v = v.replace(`$${i + 1}`, match);
+          });
+          return v;
+        },
+      });
     });
   }
 
@@ -84,10 +94,11 @@ export default class UniappRoute extends BaseRoute {
 
     // 微信原生组建
     this.original?.globalStyle?.usingComponents?._forEach((v) => {
-      if (v.startsWith('/')) {
-        v = v.slice(1);
-      }
-      this.setAbsUrl(v); // TODO 微信原生开发解析
+      // TODO 微信原生开发解析
+      // if (v.startsWith('/')) {
+      //   v = v.slice(1);
+      // }
+      // const vTmp = this.setAbsUrl(v);
       // const absUrls = matchFileAbsUrlsInWx(vTmp, ['vue']);
     });
 
@@ -124,10 +135,14 @@ export default class UniappRoute extends BaseRoute {
     });
   }
 
-  async getRoutes() {
+  async getRoutesAndHandlers() {
     await this.resolveEasycom();
     await this.resolveOther();
     await this.resolvePages();
-    return this.routes;
+
+    return {
+      routes: this.routes,
+      handlers: this.handlers,
+    };
   }
 }
