@@ -24,7 +24,7 @@ export function readFileToJson<T>(fileUrl: string): Optinonal<T> {
   return configs;
 }
 
-// 加载动态模块(esm|cjs)
+// 加载动态模块(esm|cjs) moduleUrl 决定路径
 export async function loadDynamicModule<T>(
   moduleUrl: string,
   isEsm: boolean,

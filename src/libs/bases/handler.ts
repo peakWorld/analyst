@@ -20,7 +20,7 @@ export default class BaseHandler {
 
   protected pkgJson!: PackageJson;
 
-  protected async loadCommandConfigFile() {
+  private async loadCommandConfigFile() {
     this.ctx.logger.log(`Loading Command Configs!`);
     // 读取项目相关配置
     const sourceUrl = path.join(
@@ -47,7 +47,7 @@ export default class BaseHandler {
     this.ctx.logger.log('Loaded Command Configs：', this.commandConfigs);
   }
 
-  protected async resolveCommandConfig() {
+  private async resolveCommandConfig() {
     if (!this.commandConfigs) return;
 
     this.ctx.logger.log(`Resolving Command Configs!`);
@@ -68,18 +68,18 @@ export default class BaseHandler {
 
     // 处理全局样式文件
     styles?.forEach((v) => {
-      this.ctx.appeared.add(replaceAliasCss(alias, v));
+      this.ctx.configs.routes[`virtual:${v}`] = replaceAliasCss(alias, v);
     });
 
     this.ctx.logger.log(`Resolved Command Configs!`, this.ctx.configs);
   }
 
-  protected async resolveAlias() {
+  private async resolveAlias() {
     const { alias } = this.commandConfigs;
     return alias._map<typeof alias>((v) => fs.realpathSync(v));
   }
 
-  protected async resolveFrame(): Promise<Partial<ResolvedFrame>> {
+  private async resolveFrame(): Promise<Partial<ResolvedFrame>> {
     const commadnFrames = this.commandConfigs.frames;
     const { dependencies, devDependencies } = this.pkgJson;
     const deps = dependencies.merge_([devDependencies]);
@@ -97,7 +97,7 @@ export default class BaseHandler {
     };
   }
 
-  protected async resolveRoute(
+  private async resolveRoute(
     frames: Partial<ResolvedFrame>,
     alias: Record<string, string>,
   ) {
@@ -118,14 +118,41 @@ export default class BaseHandler {
     return await router.getRoutesAndHandlers();
   }
 
+  private extendCtx() {
+    this.ctx.appeared = new Set();
+    this.ctx.current = {
+      processing: '',
+      loaded: false,
+      pending: [],
+      handled: new Set(),
+    };
+    this.ctx.setR_Now = (fileUrl) => {
+      this.ctx.appeared.add(fileUrl);
+      this.ctx.current.handled.add(fileUrl);
+      this.ctx.current.processing = fileUrl;
+      this.ctx.current.loaded = false;
+    };
+    this.ctx.addR_Pending = (fileUrl) => {
+      const { pending } = this.ctx.current;
+      if (pending.includes(fileUrl)) return;
+      this.ctx.current.pending.push(fileUrl);
+    };
+    // this.ctx.getR_Processing = () => {
+    //   if (!this.ctx.current.loaded) {
+    //     this.ctx.current.loaded = true;
+    //   }
+    //   return this.ctx.current.processing;
+    // };
+  }
+
+  protected async initCommandConfigs() {
+    await this.loadCommandConfigFile(); // 加载 command config文件
+    await this.resolveCommandConfig(); // 解析 command config
+  }
+
   constructor(protected ctx: Context) {
     this.ctx.logger.log(`Class Entity Created!`);
     this.pkgJson = getWkPkgJson();
-    this.ctx.appeared = new Set();
-  }
-
-  async initCommandConfigs() {
-    await this.loadCommandConfigFile(); // 加载 command config文件
-    await this.resolveCommandConfig(); // 解析 command config
+    this.extendCtx();
   }
 }

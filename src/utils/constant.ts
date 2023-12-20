@@ -1,7 +1,7 @@
 import process from 'node:process';
 import path from 'node:path';
-import { readFileToJson } from './file.js';
 import { fileURLToPath } from 'node:url';
+import { readFileToJson } from './file.js';
 
 const _filename = fileURLToPath(import.meta.url);
 
