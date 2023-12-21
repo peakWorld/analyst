@@ -17,17 +17,6 @@ export type TVisitor = Visitor | ((ctx: Context) => Visitor);
 export default class JsParser {
   private ast!: ParseResult;
 
-  private async setup() {
-    // 判断文件
-    const isFileUrl = path.isAbsolute(this.codeOrFileUrl);
-    const sourceCode = isFileUrl
-      ? fs.readFileSync(this.codeOrFileUrl).toString()
-      : this.codeOrFileUrl;
-    // 编译配置
-    this.setConfigs();
-    this.parse(sourceCode);
-  }
-
   private setConfigs() {
     this.options = BASE_OPTIONS.merge_([this.options ?? {}]);
   }
@@ -37,7 +26,14 @@ export default class JsParser {
     protected codeOrFileUrl: string,
     protected options?: ParserOptions,
   ) {
-    this.setup();
+    // 判断文件
+    const isFileUrl = path.isAbsolute(this.codeOrFileUrl);
+    const sourceCode = isFileUrl
+      ? fs.readFileSync(this.codeOrFileUrl).toString()
+      : this.codeOrFileUrl;
+    // 编译配置
+    this.setConfigs();
+    this.parse(sourceCode);
   }
 
   traverse(visitor: TVisitor) {

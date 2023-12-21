@@ -1,5 +1,5 @@
-import * as t from '@babel/types';
-import { saveDataToTmpJsonFile } from '../../utils/index.js';
+// import * as t from '@babel/types';
+// import { saveDataToTmpJsonFile } from '../../utils/index.js';
 import type { Visitor } from '@babel/core';
 import type { Context } from '../../types/clipanion.js';
 

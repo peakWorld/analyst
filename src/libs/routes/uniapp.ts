@@ -9,6 +9,7 @@ import {
   replaceAlias,
   wkspace,
   matchFileAbsUrls,
+  setRoute,
 } from '../../utils/index.js';
 import { MatchHandlerType } from '../../types/constant.js';
 
@@ -106,7 +107,7 @@ export default class UniappRoute extends BaseRoute {
     this.original?.tabBar?.list.forEach(({ pagePath: v }) => {
       const absUrl = matchFileAbsUrls(this.setAbsUrl(v), this.macthExt)[0];
       if (!absUrl) throw new Error(`tabBar路径"${v}"没有找到对应入口文件`);
-      this.routes[v] = absUrl;
+      this.routes.push(setRoute(absUrl, v));
     });
 
     // windows
@@ -117,7 +118,7 @@ export default class UniappRoute extends BaseRoute {
     };
     windows._forEach((v, k) => {
       if (!v) return;
-      this.routes[`virtual:uniapp-${k}`] = this.setAbsUrl(v);
+      this.routes.push(setRoute(this.setAbsUrl(v), undefined, { original: k }));
     });
   }
 
@@ -131,7 +132,7 @@ export default class UniappRoute extends BaseRoute {
     routeTmp.forEach((v) => {
       const absUrl = matchFileAbsUrls(this.setAbsUrl(v), this.macthExt)[0];
       if (!absUrl) throw new Error(`路由"${v}"没有找到对应入口文件`);
-      this.routes[v] = absUrl;
+      this.routes.push(setRoute(absUrl, v));
     });
   }
 

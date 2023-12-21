@@ -7,8 +7,13 @@ export default (text: string) => (ctx: Context) => {
     Once() {
       console.log('OnceExit..');
     },
-    AtRule() {
-      console.log('AtRule..');
+    AtRule: {
+      import(rule) {
+        console.log('import', rule.toString());
+      },
+      // '*'(rule) {
+      //   console.log('*', rule.toString());
+      // },
     },
   });
   plugin.postcss = true;

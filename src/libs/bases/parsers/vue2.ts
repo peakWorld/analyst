@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import compiler from 'vue-template-compiler';
 import JsParser from './js.js';
-import StyleParser from './style.js';
-import TemplateParser from './template.js';
+// import StyleParser from './style.js';
+// import TemplateParser from './template.js';
 import type { Context } from '../../../types/clipanion.js';
 
 export default class Vue2Parser {

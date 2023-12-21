@@ -1,7 +1,7 @@
 import { CommandKey, MatchHandlerType } from './constant.js';
 import type { BaseContext } from 'clipanion';
 import type Logger from '../libs/log.js';
-import type { SableResolvedConfigs } from './libs.js';
+import type { ResolvedConfigs, ResolvedRoute } from './libs.js';
 
 export interface MatchHandler {
   type: MatchHandlerType;
@@ -21,8 +21,9 @@ export interface Context extends BaseContext {
   logger: Logger;
   appeared: Set<string>; // 已经处理过的文件
   current: Current; // 当前路由的相关信息
-  configs: SableResolvedConfigs & { handlers: MatchHandler[] };
+  configs: ResolvedConfigs & { handlers: MatchHandler[] };
 
+  addRoute: (fileUrl: string, path?: string, extra?: AnyObj) => void; // 新增路由
   setR_Now: (fileUrl: string) => void; // 当前路由: 正在｜已经 处理文件
   addR_Pending: (fileUrl: string) => void; // 当前路由: 将要 处理文件
   // getR_Processing: () => string; // 当前路由: 获取正在处理中文件

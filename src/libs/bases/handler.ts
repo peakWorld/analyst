@@ -4,6 +4,7 @@ import {
   wkspace,
   space,
   wkName,
+  setRoute,
   getWkPkgJson,
   readFileToExcuteJs,
   getVersion,
@@ -68,7 +69,7 @@ export default class BaseHandler {
 
     // 处理全局样式文件
     styles?.forEach((v) => {
-      this.ctx.configs.routes[`virtual:${v}`] = replaceAliasCss(alias, v);
+      this.ctx.addRoute(replaceAliasCss(alias, v), undefined, { original: v });
     });
 
     this.ctx.logger.log(`Resolved Command Configs!`, this.ctx.configs);
@@ -103,7 +104,12 @@ export default class BaseHandler {
   ) {
     const { routes } = this.commandConfigs;
     // if (t.isObject(route)) return route; // TODO is关键字未生效?
-    if (!t.isArray(routes)) return { routes, handlers: [] }; // 对象直接返回
+    // 对象处理
+    if (!t.isArray(routes)) {
+      const resolved = [];
+      routes._forEach((v, k) => resolved.push(setRoute(v, k)));
+      return { routes: resolved, handlers: [] };
+    }
 
     let moduleKey = 'default';
     if (frames.uniapp) {
@@ -143,6 +149,10 @@ export default class BaseHandler {
     //   }
     //   return this.ctx.current.processing;
     // };
+    this.ctx.addRoute = (fileUrl: string, path?: string, extra?: AnyObj) => {
+      const route = setRoute(fileUrl, path, extra);
+      this.ctx.configs.routes.push(route);
+    };
   }
 
   protected async initCommandConfigs() {

@@ -8,7 +8,7 @@ export default class DefaultRoute extends BaseRoute {
   async getRoutesAndHandlers() {
     // TO_DO
     return {
-      routes: {},
+      routes: [],
       handlers: [],
     };
   }

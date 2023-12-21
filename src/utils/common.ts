@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import t from './check-type.js';
-import { ResolvedFrame } from '../types/libs.js';
+import { RouteType } from '../types/constant.js';
+import type { ResolvedFrame, ResolvedRoute } from '../types/libs.js';
 
 export function upperFirstCase(str: string) {
   return str.slice(0, 1).toLocaleUpperCase() + str.slice(1);
@@ -134,4 +135,9 @@ export function stringifyWithCircular(obj: AnyObj) {
   });
   cache = [];
   return str;
+}
+
+export function setRoute(fileUrl: string, path?: string, extra?: AnyObj) {
+  const type = !!path ? RouteType.Reality : RouteType.Virtual;
+  return { path, fileUrl, type, extra };
 }

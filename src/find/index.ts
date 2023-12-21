@@ -18,9 +18,9 @@ export default class FindHandler extends BaseHandler {
     // parser.jsParser.traverse(jtsAst(text));
 
     // Style
-    const fileUrl = '/Users/windlliu/wk/eyao.miniapp/src/uni.scss';
-    // const fileUrl =
-    //   '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/index.less';
+    const fileUrl2 = '/Users/windlliu/wk/eyao.miniapp/src/uni.scss';
+    const fileUrl =
+      '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/index.less';
 
     this.ctx.setR_Now(fileUrl);
     const parser = new StyleParser(this.ctx, fileUrl, { type: StyleType.Less });

@@ -24,16 +24,6 @@ export default class StyleParser {
 
   private sourceCode!: string;
 
-  private async setup() {
-    // 判断文件
-    const isFileUrl = path.isAbsolute(this.codeOrFileUrl);
-    this.sourceCode = isFileUrl
-      ? fs.readFileSync(this.codeOrFileUrl).toString()
-      : this.codeOrFileUrl;
-    this.setConfigs(); // 编译配置
-    this.processor = postcss();
-  }
-
   private setConfigs() {
     const base = { ...BASE_OPTIONS };
     if (this.options?.type === StyleType.Less) {
@@ -49,12 +39,18 @@ export default class StyleParser {
     protected codeOrFileUrl: string,
     protected options?: ParserOptions,
   ) {
-    this.setup();
+    // 判断文件
+    const isFileUrl = path.isAbsolute(this.codeOrFileUrl);
+    this.sourceCode = isFileUrl
+      ? fs.readFileSync(this.codeOrFileUrl).toString()
+      : this.codeOrFileUrl;
+    this.setConfigs(); // 编译配置
+    this.processor = postcss();
   }
 
   async traverse(plugin: Plugin) {
     if (t.isFunc(plugin)) {
-      this.processor.use((<any>plugin)(this.ctx));
+      this.processor.use((<any>plugin)(this.ctx)); // TODO 类型断言
     }
     if (t.isArray(plugin)) {
       plugin.forEach((p) => this.processor.use((<any>p)(this.ctx)));

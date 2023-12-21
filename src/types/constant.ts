@@ -14,3 +14,9 @@ export enum StyleType {
   Less,
   Scss,
 }
+
+/** 路由类型 */
+export enum RouteType {
+  Reality = 'reality',
+  Virtual = 'virtual',
+}
