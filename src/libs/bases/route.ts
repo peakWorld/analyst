@@ -2,7 +2,10 @@ import { getMatchExtname } from '../../utils/index.js';
 import type { Context, MatchHandler } from '../../types/clipanion.js';
 import type { ResolvedFrame, ResolvedRoute } from '../../types/libs.js';
 
-export type RouteContext = Omit<Context, 'configs' | 'addRoute'>;
+export type RouteContext = Omit<
+  Context,
+  'configs' | 'addRoute' | 'setR_Now' | 'addR_Pending'
+>;
 
 export default abstract class BaseRoute {
   abstract setup(urls: string[]): Promise<void>;

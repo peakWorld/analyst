@@ -1,7 +1,7 @@
 import { CommandKey, MatchHandlerType } from './constant.js';
 import type { BaseContext } from 'clipanion';
 import type Logger from '../libs/log.js';
-import type { ResolvedConfigs, ResolvedRoute } from './libs.js';
+import type { ResolvedConfigs } from './libs.js';
 
 export interface MatchHandler {
   type: MatchHandlerType;

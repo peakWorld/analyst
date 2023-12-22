@@ -10,6 +10,7 @@ import {
   getVersion,
   loadDynamicModule,
   replaceAliasCss,
+  getAbsHasExt,
   t,
 } from '../../utils/index.js';
 import type { SableConfigs, ResolvedFrame } from '../../types/libs.js';
@@ -24,13 +25,9 @@ export default class BaseHandler {
   private async loadCommandConfigFile() {
     this.ctx.logger.log(`Loading Command Configs!`);
     // 读取项目相关配置
-    const sourceUrl = path.join(
-      wkspace,
-      '.cache',
-      `${this.ctx.key.toLowerCase()}.ts`,
-    );
-    const destUrl = path.join(space, '.cache', `${wkName}.ts`);
-    const templateUrl = path.join(space, '.cache', 'template.ts');
+    const sourceUrl = getAbsHasExt(`.cache/${this.ctx.key.toLowerCase()}.ts`);
+    const destUrl = getAbsHasExt(`.cache/${wkName}.ts`, space);
+    const templateUrl = getAbsHasExt(`.cache/template.ts`, space);
 
     // 如果项目不存在该配置文件, 将模板拷贝到当前项目
     if (!fs.existsSync(sourceUrl)) {
@@ -60,7 +57,7 @@ export default class BaseHandler {
     const { routes, handlers } = await this.resolveRoute(frames, alias);
 
     this.ctx.configs = {
-      entry: entry?.map((v) => fs.realpathSync(v)) ?? [],
+      entry: entry?.map((v) => getAbsHasExt(v)) ?? [],
       alias,
       frames,
       handlers,
@@ -77,7 +74,7 @@ export default class BaseHandler {
 
   private async resolveAlias() {
     const { alias } = this.commandConfigs;
-    return alias._map<typeof alias>((v) => fs.realpathSync(v));
+    return alias._map<typeof alias>((v) => getAbsHasExt(v));
   }
 
   private async resolveFrame(): Promise<Partial<ResolvedFrame>> {
@@ -120,7 +117,7 @@ export default class BaseHandler {
       true,
     );
     const router = new Router(this.ctx, alias, frames);
-    await router.setup(routes.map((v) => fs.realpathSync(v)));
+    await router.setup(routes.map((v) => getAbsHasExt(v)));
     return await router.getRoutesAndHandlers();
   }
 

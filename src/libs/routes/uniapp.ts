@@ -8,7 +8,7 @@ import {
   readFileToJson,
   replaceAlias,
   wkspace,
-  matchFileAbsUrls,
+  getAbsByMatchExts,
   setRoute,
 } from '../../utils/index.js';
 import { MatchHandlerType } from '../../types/constant.js';
@@ -51,7 +51,9 @@ export interface UniappConfig {
 export default class UniappRoute extends BaseRoute {
   private original!: UniappConfig; // 原始路由配置
 
-  private setAbsUrl(v: string) {
+  // TODO src需要传入配置吗？
+  // 绝对文件路径(无文件后缀、需要逐个匹配)
+  private setAbsNoExt(v: string) {
     return path.join(wkspace, 'src', v);
   }
 
@@ -105,7 +107,7 @@ export default class UniappRoute extends BaseRoute {
 
     // tabBar
     this.original?.tabBar?.list.forEach(({ pagePath: v }) => {
-      const absUrl = matchFileAbsUrls(this.setAbsUrl(v), this.macthExt)[0];
+      const absUrl = getAbsByMatchExts(this.setAbsNoExt(v), this.macthExt)[0];
       if (!absUrl) throw new Error(`tabBar路径"${v}"没有找到对应入口文件`);
       this.routes.push(setRoute(absUrl, v));
     });
@@ -118,7 +120,9 @@ export default class UniappRoute extends BaseRoute {
     };
     windows._forEach((v, k) => {
       if (!v) return;
-      this.routes.push(setRoute(this.setAbsUrl(v), undefined, { original: k }));
+      this.routes.push(
+        setRoute(this.setAbsNoExt(v), undefined, { original: k }),
+      );
     });
   }
 
@@ -130,7 +134,7 @@ export default class UniappRoute extends BaseRoute {
       pages?.forEach((v) => routeTmp.push(path.join(root, v.path)));
     });
     routeTmp.forEach((v) => {
-      const absUrl = matchFileAbsUrls(this.setAbsUrl(v), this.macthExt)[0];
+      const absUrl = getAbsByMatchExts(this.setAbsNoExt(v), this.macthExt)[0];
       if (!absUrl) throw new Error(`路由"${v}"没有找到对应入口文件`);
       this.routes.push(setRoute(absUrl, v));
     });

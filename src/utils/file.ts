@@ -2,19 +2,11 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import fs from 'fs-extra';
 import esbuild from 'esbuild';
-import { wkspace, space } from './constant.js';
+import { space } from './constant.js';
 import { stringifyWithCircular } from './common.js';
 import t from './check-type.js';
 
 const _require = createRequire(import.meta.url);
-
-// 获取绝对路径地址
-export function getAbsFileUrl(fileUrl: string, dirname = wkspace) {
-  if (!path.isAbsolute(fileUrl)) {
-    fileUrl = path.join(dirname, fileUrl);
-  }
-  return fileUrl;
-}
 
 // 读取json文件
 export function readFileToJson<T>(fileUrl: string): Optinonal<T> {
