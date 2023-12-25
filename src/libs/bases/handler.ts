@@ -1,7 +1,5 @@
-import path from 'node:path';
 import fs from 'fs-extra';
 import {
-  wkspace,
   space,
   wkName,
   setRoute,
@@ -9,7 +7,7 @@ import {
   readFileToExcuteJs,
   getVersion,
   loadDynamicModule,
-  replaceAliasCss,
+  getAbsByAliasInCss,
   getAbsHasExt,
   t,
 } from '../../utils/index.js';
@@ -66,7 +64,7 @@ export default class BaseHandler {
 
     // 处理全局样式文件
     styles?.forEach((v) => {
-      this.ctx.addRoute(replaceAliasCss(alias, v), undefined, { original: v });
+      this.ctx.configs.entry.push(getAbsByAliasInCss(alias, v));
     });
 
     this.ctx.logger.log(`Resolved Command Configs!`, this.ctx.configs);
@@ -161,5 +159,12 @@ export default class BaseHandler {
     this.ctx.logger.log(`Class Entity Created!`);
     this.pkgJson = getWkPkgJson();
     this.extendCtx();
+  }
+
+  async loop(fileUrl: string) {
+    const { handled } = this.ctx.current;
+    if (handled.has(fileUrl)) return;
+
+    this.ctx.setR_Now(fileUrl);
   }
 }

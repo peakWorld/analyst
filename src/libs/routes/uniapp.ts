@@ -6,7 +6,7 @@ import BaseRoute from '../bases/route.js';
 import {
   readFileToExcuteJs,
   readFileToJson,
-  replaceAlias,
+  getAbsByAlias,
   wkspace,
   getAbsByMatchExts,
   setRoute,
@@ -77,7 +77,7 @@ export default class UniappRoute extends BaseRoute {
   // uniapp 特殊配置
   async resolveEasycom() {
     this.original?.easycom?.custom?._forEach((v, k) => {
-      const absUrl = replaceAlias(this.alias, v);
+      const absUrl = getAbsByAlias(this.alias, v);
       if (!absUrl) return;
       this.handlers.push({
         type: MatchHandlerType.Tag,

@@ -10,6 +10,9 @@ export default class FindHandler extends BaseHandler {
     if (!text) throw new Error('查询条件为空!');
     await super.initCommandConfigs();
 
+    // await this.handleEntries();
+    // await this.handleRoutes();
+
     // Vue
     // const fileUrl =
     //   '/Users/windlliu/wk/eyao.miniapp/src/packageDrug/nearSearch/index.vue';
@@ -25,5 +28,15 @@ export default class FindHandler extends BaseHandler {
     this.ctx.setR_Now(fileUrl);
     const parser = new StyleParser(this.ctx, fileUrl, { type: StyleType.Less });
     parser.traverse(stylePlugin(text));
+  }
+
+  async handleEntries() {
+    const entries = this.ctx.configs.entry;
+    entries.forEach(async (entry) => await this.loop(entry));
+  }
+
+  async handleRoutes() {
+    const routes = this.ctx.configs.routes;
+    routes.forEach(async (route) => await this.loop(route.fileUrl));
   }
 }
