@@ -1,6 +1,7 @@
-import { getMatchExtname } from '../../utils/index.js';
+import { getMatchFileType } from '../../utils/index.js';
 import type { Context, MatchHandler } from '../../types/clipanion.js';
 import type { ResolvedFrame, ResolvedRoute } from '../../types/libs.js';
+import type { FileType } from '../../types/constant.js';
 
 export type RouteContext = Omit<
   Context,
@@ -24,7 +25,7 @@ export default abstract class BaseRoute {
 
   protected handlers!: MatchHandler[];
 
-  protected macthExt!: string[];
+  protected macthExt!: FileType[];
 
   /**
    * 处理正则,转化成真实路由
@@ -38,7 +39,7 @@ export default abstract class BaseRoute {
   ) {
     this.routes = [];
     this.handlers = [];
-    this.macthExt = getMatchExtname(frame);
+    this.macthExt = getMatchFileType(frame);
   }
 }
 

@@ -31,12 +31,14 @@
     "fs-extra": "^11.1.1",
     "postcss": "^8.4.32",
     "postcss-less": "^6.0.0",
+    "postcss-scss": "^4.0.9",
     "vue-template-compiler": "^2.7.15"
   },
   "devDependencies": {
     "@types/babel__core": "^7.20.5",
     "@types/fs-extra": "^11.0.1",
     "@types/node": "~16",
+    "@types/postcss-less": "^4.0.6",
     "@typescript-eslint/eslint-plugin": "~5.26",
     "@typescript-eslint/parser": "~5.26",
     "cross-env": "^7.0.3",

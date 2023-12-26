@@ -9,13 +9,22 @@ import {
   loadDynamicModule,
   getAbsByAliasInCss,
   getAbsHasExt,
+  getExt,
   t,
 } from '../../utils/index.js';
-import type { SableConfigs, ResolvedFrame } from '../../types/libs.js';
+import Vue2Parser from '../../libs/bases/parsers/vue2.js';
+import StyleParser from '../../libs/bases/parsers/style.js';
+import JsParser from '../../libs/bases/parsers/js.js';
+import { FileType } from '../../types/constant.js';
+import type {
+  SableConfigs,
+  ResolvedFrame,
+  ResolvedVisitor,
+} from '../../types/libs.js';
 import type { Context } from '../../types/clipanion.js';
 import type { IBaseRoute } from './route.js';
 
-export default class BaseHandler {
+export default abstract class BaseHandler {
   private commandConfigs!: SableConfigs;
 
   protected pkgJson!: PackageJson;
@@ -67,7 +76,7 @@ export default class BaseHandler {
       this.ctx.configs.entry.push(getAbsByAliasInCss(alias, v));
     });
 
-    this.ctx.logger.log(`Resolved Command Configs!`, this.ctx.configs);
+    this.ctx.logger.log(`Resolved Command Configs：`, this.ctx.configs);
   }
 
   private async resolveAlias() {
@@ -119,6 +128,7 @@ export default class BaseHandler {
     return await router.getRoutesAndHandlers();
   }
 
+  // TODO 分离出去
   private extendCtx() {
     this.ctx.appeared = new Set();
     this.ctx.current = {
@@ -126,27 +136,43 @@ export default class BaseHandler {
       loaded: false,
       pending: [],
       handled: new Set(),
+      type: undefined,
     };
+    this.ctx.visitors = {} as ResolvedVisitor;
+
     this.ctx.setR_Now = (fileUrl) => {
       this.ctx.appeared.add(fileUrl);
       this.ctx.current.handled.add(fileUrl);
       this.ctx.current.processing = fileUrl;
+      this.ctx.current.type = getExt(fileUrl);
       this.ctx.current.loaded = false;
+      return this.ctx.current;
     };
     this.ctx.addR_Pending = (fileUrl) => {
       const { pending } = this.ctx.current;
       if (pending.includes(fileUrl)) return;
       this.ctx.current.pending.push(fileUrl);
     };
-    // this.ctx.getR_Processing = () => {
-    //   if (!this.ctx.current.loaded) {
-    //     this.ctx.current.loaded = true;
-    //   }
-    //   return this.ctx.current.processing;
-    // };
+    this.ctx.restR_Current = () => {
+      this.ctx.current.handled.clear();
+      this.ctx.current.pending.length = 0;
+      this.ctx.current.loaded = false;
+      this.ctx.current.processing = '';
+    };
     this.ctx.addRoute = (fileUrl: string, path?: string, extra?: AnyObj) => {
       const route = setRoute(fileUrl, path, extra);
       this.ctx.configs.routes.push(route);
+    };
+    this.ctx.addVisitor = (visitor) => {
+      const { type, handler } = visitor;
+      type.forEach((v) => {
+        if (!this.ctx.visitors[v]) {
+          this.ctx.visitors[v] = [];
+        }
+        if (!this.ctx.visitors[v].includes(handler)) {
+          this.ctx.visitors[v].push(handler);
+        }
+      });
     };
   }
 
@@ -161,10 +187,45 @@ export default class BaseHandler {
     this.extendCtx();
   }
 
-  async loop(fileUrl: string) {
-    const { handled } = this.ctx.current;
-    if (handled.has(fileUrl)) return;
+  async handler(fileUrl: string) {
+    const { visitors, current } = this.ctx;
+    const { handled, pending } = current;
+    this.ctx.addR_Pending(fileUrl);
 
-    this.ctx.setR_Now(fileUrl);
+    while (pending.length) {
+      fileUrl = pending.shift();
+      console.log('handler fileUrl', fileUrl);
+
+      if (!fileUrl || handled.has(fileUrl)) continue;
+      const { processing, type } = this.ctx.setR_Now(fileUrl);
+      switch (type) {
+        case FileType.Css:
+        case FileType.Less:
+        case FileType.Scss:
+          {
+            const parser = new StyleParser(this.ctx, { type });
+            await parser.traverse(visitors[type]);
+          }
+          break;
+        case FileType.Js:
+        case FileType.Ts:
+          {
+            const parser = new JsParser(this.ctx, { type });
+            visitors[type].forEach((visitor) => parser.traverse(visitor));
+          }
+          break;
+        case FileType.Vue:
+          {
+            await new Vue2Parser(this.ctx, processing).setup();
+          }
+          break;
+
+        default:
+        // TODO NOTHING
+      }
+      console.log('pending.length...');
+    }
+
+    this.ctx.restR_Current();
   }
 }

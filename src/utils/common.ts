@@ -1,5 +1,6 @@
+import path from 'node:path';
 import t from './check-type.js';
-import { RouteType } from '../types/constant.js';
+import { RouteType, FileType } from '../types/constant.js';
 
 export function upperFirstCase(str: string) {
   return str.slice(0, 1).toLocaleUpperCase() + str.slice(1);
@@ -21,6 +22,14 @@ export function proxy<T extends Record<string | symbol, any>>(target: T): T {
 export function getVersion(version: string) {
   const [_, v] = /^[~^]?(\d)/.exec(version);
   return Number(v);
+}
+
+/**
+ * 获取文件路径后缀名, 必须处于FileType枚举中
+ */
+export function getExt(fileUrl: string) {
+  const extname = path.extname(fileUrl);
+  return extname.slice(1) as FileType;
 }
 
 export function isTsFile(fileName: string) {

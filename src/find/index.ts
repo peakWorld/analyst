@@ -1,42 +1,57 @@
 import BaseHandler from '../libs/bases/handler.js';
-// import Vue2Parser from '../libs/bases/parsers/vue2.js';
-import StyleParser from '../libs/bases/parsers/style.js';
-// import jtsAst from './ast/jts.js';
+import jtsAst from './ast/jts.js';
 import stylePlugin from './ast/style.js';
-import { StyleType } from '../types/constant.js';
+import { FileType } from '../types/constant.js';
 
 export default class FindHandler extends BaseHandler {
+  private text!: string;
+
   async setup(text: string) {
     if (!text) throw new Error('查询条件为空!');
-    await super.initCommandConfigs();
+    this.text = text;
 
-    // await this.handleEntries();
+    await super.initCommandConfigs();
+    await this.setVisitors();
+
+    await this.handleEntries();
     // await this.handleRoutes();
 
     // Vue
     // const fileUrl =
     //   '/Users/windlliu/wk/eyao.miniapp/src/packageDrug/nearSearch/index.vue';
-    // this.ctx.setR_Now(fileUrl);
-    // const parser = new Vue2Parser(this.ctx, fileUrl);
-    // parser.jsParser.traverse(jtsAst(text));
 
     // Style
-    const fileUrl2 = '/Users/windlliu/wk/eyao.miniapp/src/uni.scss';
-    const fileUrl =
-      '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/index.less';
+    // const fileUrl2 = '/Users/windlliu/wk/eyao.miniapp/src/uni.scss';
+    // const fileUrl =
+    //   '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/index.less';
+  }
 
-    this.ctx.setR_Now(fileUrl);
-    const parser = new StyleParser(this.ctx, fileUrl, { type: StyleType.Less });
-    parser.traverse(stylePlugin(text));
+  async setVisitors() {
+    this.ctx.addVisitor({
+      type: [FileType.Css, FileType.Less, FileType.Scss],
+      handler: stylePlugin(this.text),
+    });
+    this.ctx.addVisitor({
+      type: [FileType.Js, FileType.Ts],
+      handler: jtsAst(this.text),
+    });
   }
 
   async handleEntries() {
-    const entries = this.ctx.configs.entry;
-    entries.forEach(async (entry) => await this.loop(entry));
+    // const entries = this.ctx.configs.entry;
+    const entries = [
+      '/Users/windlliu/wk/eyao.miniapp/src/packageDrug/nearSearch/index.vue',
+    ];
+    while (entries.length) {
+      await this.handler(entries.shift());
+    }
   }
 
   async handleRoutes() {
-    const routes = this.ctx.configs.routes;
-    routes.forEach(async (route) => await this.loop(route.fileUrl));
+    const { routes } = this.ctx.configs;
+    while (routes.length) {
+      const { fileUrl } = routes.shift();
+      await this.handler(fileUrl);
+    }
   }
 }

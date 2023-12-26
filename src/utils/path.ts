@@ -1,32 +1,27 @@
 import path from 'node:path';
 import fs from 'fs-extra';
 import { wkspace } from './constant.js';
+import { FileType } from '../types/constant.js';
 import type { ResolvedFrame } from '../types/libs.js';
 
 /**
  * 根据frame细分 getAbsByMatchExts函数要匹配的文件后缀
  */
-export function getMatchExtname(
-  frame: Partial<ResolvedFrame>,
-  matchCss = false,
-) {
-  if (matchCss) {
-    let exts = ['css'];
-    if (frame.less) {
-      exts = [...exts, 'less'];
-    }
-    if (frame.scss) {
-      exts = [...exts, 'scss'];
-    }
+export function getMatchFileType(frame: Partial<ResolvedFrame>, isCss = false) {
+  if (isCss) {
+    let exts = [FileType.Css];
+    if (frame.less) exts.push(FileType.Less);
+    if (frame.scss) exts.push(FileType.Scss);
     return exts;
   }
-
-  let exts = ['ts', 'js'];
+  let exts = [FileType.Js];
+  if (frame.ts) exts.push(FileType.Ts);
   if (frame.react) {
-    exts = [...exts, 'tsx', 'jsx'];
+    exts.push(FileType.Jsx);
+    if (frame.ts) exts.push(FileType.Tsx);
   }
   if (frame.vue2 || frame.vue3) {
-    exts = [...exts, 'vue'];
+    exts.push(FileType.Vue);
   }
   return exts;
 }
@@ -79,10 +74,10 @@ export function getAbsByAlias(alias: Record<string, string>, url: string) {
  *
  * 由绝对路径、可能的文件后缀 => 查找相应的系统文件
  * fileUrl: /xxx/xx
- * exts: [.js, .ts]
+ * exts: [js, ts]
  * 判断 /xxx/xx.js | /xxx/xx.ts 是否存在, 存在即返回
  */
-export function getAbsByMatchExts(fileUrl: string, exts: string[]) {
+export function getAbsByMatchExts(fileUrl: string, exts: FileType[]) {
   // 路径存在
   if (fs.existsSync(fileUrl)) {
     const stat = fs.lstatSync(fileUrl);
@@ -115,8 +110,14 @@ export function getAbsHasExt(fileUrl: string, prefix = wkspace) {
 }
 
 // 原生微信开发查找逻辑
-export function matchFileAbsUrlsInWx(fileUrl: string, extraExts?: string[]) {
-  let exts = ['js', 'json', 'wxss', 'wxml', 'wxs'];
+export function matchFileAbsUrlsInWx(fileUrl: string, extraExts?: FileType[]) {
+  let exts = [
+    FileType.Js,
+    FileType.Json,
+    FileType.Wxss,
+    FileType.Wxml,
+    FileType.Wxs,
+  ];
   if (extraExts?.length) {
     exts = [...exts, ...extraExts];
   }

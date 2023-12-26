@@ -1,4 +1,6 @@
-import { RouteType } from '../types/constant.js';
+import { RouteType, FileType } from '../types/constant.js';
+import type { StyleVisitor } from '../libs/bases/parsers/style.js';
+import type { JsVisitor } from '../libs/bases/parsers/js.js';
 
 // 项目命令行配置
 export interface SableConfigs {
@@ -12,6 +14,7 @@ export interface SableConfigs {
 // 解析后配置
 export interface ResolvedFrame {
   uniapp: boolean;
+  ts: boolean;
 
   vue2: boolean;
   vue3: boolean;
@@ -34,3 +37,19 @@ export interface ResolvedConfigs {
   frames: Partial<ResolvedFrame>;
   alias: Record<string, string>;
 }
+
+export interface Visitor {
+  type: FileType[];
+  handler: StyleVisitor | JsVisitor;
+}
+
+export type ResolvedVisitor = {
+  [T in Partial<FileType>]: T extends
+    | FileType.Css
+    | FileType.Less
+    | FileType.Scss
+    ? Array<StyleVisitor>
+    : T extends FileType.Js | FileType.Ts
+    ? Array<JsVisitor>
+    : any[];
+};

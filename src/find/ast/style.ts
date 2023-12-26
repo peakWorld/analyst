@@ -4,7 +4,7 @@ import type { Context } from '../../types/clipanion.js';
 export default (text: string) => (ctx: Context) => {
   const plugin: PluginCreator<ProcessOptions> = () => ({
     postcssPlugin: 'postcss-find',
-    Once() {
+    Once(root) {
       console.log('OnceExit..');
     },
     AtRule: {

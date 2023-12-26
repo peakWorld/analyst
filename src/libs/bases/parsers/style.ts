@@ -1,60 +1,72 @@
-import path from 'node:path';
 import fs from 'fs-extra';
 import postcss from 'postcss';
-import less from 'postcss-less';
 import type { PluginCreator, Processor, ProcessOptions } from 'postcss';
-import { StyleType } from '../../../types/constant.js';
+import { FileType } from '../../../types/constant.js';
 import { t } from '../../../utils/index.js';
 import type { Context } from '../../../types/clipanion.js';
 
-const BASE_OPTIONS: ParserOptions = {
-  type: StyleType.Css,
+const BASE_OPTIONS: ProcessOptions = {
   from: undefined,
 };
 
-export interface ParserOptions extends ProcessOptions {
-  type: StyleType;
+export interface StyleParserConfigs {
+  type: FileType;
+  code: string;
+  options: ProcessOptions;
 }
 
 export type PluginCb = (ctx: Context) => PluginCreator<ProcessOptions>;
-export type Plugin = PluginCb | PluginCb[];
+export type StyleVisitor = PluginCb | PluginCreator<ProcessOptions>;
 
 export default class StyleParser {
   private processor!: Processor;
 
   private sourceCode!: string;
 
-  private setConfigs() {
-    const base = { ...BASE_OPTIONS };
-    if (this.options?.type === StyleType.Less) {
-      base.syntax = less;
-    }
+  private _options!: ProcessOptions;
 
-    delete base.type;
-    this.options = base;
+  private async mergeOptions() {
+    if (!this._options) {
+      let syntax = null;
+      switch (this.options?.type) {
+        case FileType.Less:
+          syntax = await import('postcss-less');
+          break;
+        case FileType.Scss:
+          syntax = await import('postcss-scss');
+          break;
+        default:
+      }
+      this._options = syntax
+        ? { ...BASE_OPTIONS, syntax }
+        : { ...BASE_OPTIONS };
+    }
+    return this._options;
   }
 
   constructor(
     protected ctx: Context,
-    protected codeOrFileUrl: string,
-    protected options?: ParserOptions,
+    protected options?: Partial<StyleParserConfigs>,
   ) {
-    // 判断文件
-    const isFileUrl = path.isAbsolute(this.codeOrFileUrl);
-    this.sourceCode = isFileUrl
-      ? fs.readFileSync(this.codeOrFileUrl).toString()
-      : this.codeOrFileUrl;
-    this.setConfigs(); // 编译配置
+    let sourceCode = options?.code;
+    if (!sourceCode) {
+      sourceCode = fs.readFileSync(ctx.current.processing).toString();
+    }
+    this.sourceCode = sourceCode;
     this.processor = postcss();
   }
 
-  async traverse(plugin: Plugin) {
-    if (t.isFunc(plugin)) {
-      this.processor.use((<any>plugin)(this.ctx)); // TODO 类型断言
-    }
+  async traverse(plugin: StyleVisitor[]) {
     if (t.isArray(plugin)) {
-      plugin.forEach((p) => this.processor.use((<any>p)(this.ctx)));
+      plugin.forEach((p) => {
+        const tmp = <any>p;
+        if (tmp.postcss) {
+          this.processor.use(tmp);
+        } else {
+          this.processor.use(tmp(this.ctx));
+        }
+      });
     }
-    await this.processor.process(this.sourceCode, this.options);
+    await this.processor.process(this.sourceCode, await this.mergeOptions());
   }
 }

@@ -8,11 +8,24 @@ export enum MatchHandlerType {
   Tag = 'tag', // 标签
 }
 
-/** 样式文件类型 */
-export enum StyleType {
-  Css = 0,
-  Less,
-  Scss,
+/** 文件类型 */
+export enum FileType {
+  Js = 'js',
+  Ts = 'ts',
+
+  Css = 'css',
+  Less = 'less',
+  Scss = 'scss',
+
+  Vue = 'vue',
+
+  Jsx = 'jsx',
+  Tsx = 'tsx',
+
+  Json = 'json',
+  Wxss = 'wxss',
+  Wxml = 'wxml',
+  Wxs = 'wxs',
 }
 
 /** 路由类型 */
