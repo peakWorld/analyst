@@ -7,7 +7,7 @@ export default (search: string) => (ctx: Context) => {
   const visitor: Visitor = {
     exit(path) {
       if (t.isProgram(path.node)) {
-        console.log('exit...', path.node.type);
+        // console.log('exit...', path.node.type);
       }
     },
   };

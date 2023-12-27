@@ -26,6 +26,7 @@ export default class JsParser {
   private _options!: ParserOptions;
 
   private mergeOptions() {
+    // TODO 根据文件类型区分参数
     this._options = BASE_OPTIONS.merge_([this.options?.options ?? {}]);
   }
 

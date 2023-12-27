@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import compiler from 'vue-template-compiler';
 import JsParser from './js.js';
 import StyleParser from './style.js';
-// import TemplateParser from './template.js';
+import TemplateParser from './template.js';
 import { FileType } from '../../../types/constant.js';
 import { getAbsHasExt } from '../../../utils/index.js';
 import type { Context } from '../../../types/clipanion.js';
@@ -18,6 +18,8 @@ export default class Vue2Parser {
 
     if (template.content) {
       // TODO
+      const parser = new TemplateParser(this.ctx, { code: template.content });
+      // visitors.template?.forEach((visitor) => parser.traverse(visitor));
     }
     if (script.content) {
       const type = configs.frames?.ts ? FileType.Ts : FileType.Js;
@@ -38,9 +40,9 @@ export default class Vue2Parser {
           }
         });
       }
-      let i = 0;
-      while (i < styles.length) {
-        const { lang, content, src } = styles[i];
+
+      for (let style of styles) {
+        const { lang, content, src } = style;
         const type = (lang ?? mayType) as FileType.Css; // TODO 类型断言
         if (src) {
           this.ctx.addR_Pending(
@@ -51,7 +53,6 @@ export default class Vue2Parser {
           const parser = new StyleParser(this.ctx, { type, code: content });
           await parser.traverse(visitors[type]);
         }
-        i++;
       }
     }
   }

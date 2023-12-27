@@ -1,6 +1,6 @@
 import { Command, Option } from 'clipanion';
 import FindHandler from './index.js';
-import BaseCommand from '../libs/bases/command.js';
+import BaseCommand from '../core/bases/command.js';
 import { CommandKey } from '../types/constant.js';
 
 export default class FindCommand extends BaseCommand {

@@ -10,5 +10,9 @@
   },
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "code-runner.executorMap": {
+    "typescript": "node -r ts-node/register",
+    "javascript": "node"
   }
 }

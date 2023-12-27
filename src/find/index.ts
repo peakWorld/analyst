@@ -1,6 +1,7 @@
-import BaseHandler from '../libs/bases/handler.js';
+import BaseHandler from '../core/bases/handler.js';
 import jtsAst from './ast/jts.js';
-import stylePlugin from './ast/style.js';
+import styleAst from './ast/style.js';
+import templateAst from './ast/template.js';
 import { FileType } from '../types/constant.js';
 
 export default class FindHandler extends BaseHandler {
@@ -29,11 +30,15 @@ export default class FindHandler extends BaseHandler {
   async setVisitors() {
     this.ctx.addVisitor({
       type: [FileType.Css, FileType.Less, FileType.Scss],
-      handler: stylePlugin(this.text),
+      handler: styleAst(this.text),
     });
     this.ctx.addVisitor({
       type: [FileType.Js, FileType.Ts],
       handler: jtsAst(this.text),
+    });
+    this.ctx.addVisitor({
+      type: [FileType.Template],
+      handler: templateAst(this.text),
     });
   }
 
@@ -42,16 +47,15 @@ export default class FindHandler extends BaseHandler {
     const entries = [
       '/Users/windlliu/wk/eyao.miniapp/src/packageDrug/nearSearch/index.vue',
     ];
-    while (entries.length) {
-      await this.handler(entries.shift());
+    for (let entry of entries) {
+      await this.handler(entry);
     }
   }
 
   async handleRoutes() {
     const { routes } = this.ctx.configs;
-    while (routes.length) {
-      const { fileUrl } = routes.shift();
-      await this.handler(fileUrl);
+    for (let route of routes) {
+      await this.handler(route.fileUrl);
     }
   }
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import './libs/extends.js';
+import './core/extends.js';
 
 import { Cli, Builtins } from 'clipanion';
 import StashCommand from './stash/command.js';

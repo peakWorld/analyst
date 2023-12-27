@@ -1,6 +1,6 @@
 import { CommandKey, MatchHandlerType, FileType } from './constant.js';
 import type { BaseContext } from 'clipanion';
-import type Logger from '../libs/log.js';
+import type Logger from '../core/log.js';
 import type { ResolvedConfigs, ResolvedVisitor, Visitor } from './libs.js';
 
 export interface MatchHandler {
@@ -22,7 +22,7 @@ export interface Context extends BaseContext {
   logger: Logger;
   appeared: Set<string>; // 已经处理过的文件
   current: Current; // 当前路由的相关信息
-  visitors: ResolvedVisitor;
+  visitors: ResolvedVisitor; // 逻辑处理
   configs: ResolvedConfigs & { handlers: MatchHandler[] };
 
   addRoute: (fileUrl: string, path?: string, extra?: AnyObj) => void; // 新增路由

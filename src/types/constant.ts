@@ -26,6 +26,9 @@ export enum FileType {
   Wxss = 'wxss',
   Wxml = 'wxml',
   Wxs = 'wxs',
+
+  Html = 'html', // html文本
+  Template = 'template', // dsl语法, 例如Vue模板
 }
 
 /** 路由类型 */

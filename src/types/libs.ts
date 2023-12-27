@@ -1,6 +1,7 @@
 import { RouteType, FileType } from '../types/constant.js';
-import type { StyleVisitor } from '../libs/bases/parsers/style.js';
-import type { JsVisitor } from '../libs/bases/parsers/js.js';
+import type { StyleVisitor } from '../core/bases/parsers/style.js';
+import type { JsVisitor } from '../core/bases/parsers/js.js';
+import type { TemplateVisitor } from '../core/bases/parsers/template.js';
 
 // 项目命令行配置
 export interface SableConfigs {
@@ -40,7 +41,7 @@ export interface ResolvedConfigs {
 
 export interface Visitor {
   type: FileType[];
-  handler: StyleVisitor | JsVisitor;
+  handler: StyleVisitor | JsVisitor | TemplateVisitor;
 }
 
 export type ResolvedVisitor = {
@@ -51,5 +52,7 @@ export type ResolvedVisitor = {
     ? Array<StyleVisitor>
     : T extends FileType.Js | FileType.Ts
     ? Array<JsVisitor>
+    : T extends FileType.Html | FileType.Template
+    ? Array<TemplateVisitor>
     : any[];
 };

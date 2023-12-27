@@ -1,6 +1,6 @@
 import { Command, Option } from 'clipanion';
 // import Analyze from './analyze/index.js';
-// import Logger from '../libs/log.js';
+// import Logger from '../core/log.js';
 import type { Context } from '../types/clipanion.js';
 
 export default class TrashCommand extends Command<Context> {

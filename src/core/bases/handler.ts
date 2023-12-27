@@ -12,9 +12,9 @@ import {
   getExt,
   t,
 } from '../../utils/index.js';
-import Vue2Parser from '../../libs/bases/parsers/vue2.js';
-import StyleParser from '../../libs/bases/parsers/style.js';
-import JsParser from '../../libs/bases/parsers/js.js';
+import Vue2Parser from '../../core/bases/parsers/vue2.js';
+import StyleParser from '../../core/bases/parsers/style.js';
+import JsParser from '../../core/bases/parsers/js.js';
 import { FileType } from '../../types/constant.js';
 import type {
   SableConfigs,
@@ -120,7 +120,7 @@ export default abstract class BaseHandler {
       moduleKey = 'uniapp';
     }
     const Router = await loadDynamicModule<IBaseRoute>(
-      `../libs/routes/${moduleKey}.js`,
+      `../core/routes/${moduleKey}.js`,
       true,
     );
     const router = new Router(this.ctx, alias, frames);
@@ -194,7 +194,7 @@ export default abstract class BaseHandler {
 
     while (pending.length) {
       fileUrl = pending.shift();
-      console.log('handler fileUrl', fileUrl);
+      // console.log('handler fileUrl', fileUrl);
 
       if (!fileUrl || handled.has(fileUrl)) continue;
       const { processing, type } = this.ctx.setR_Now(fileUrl);
