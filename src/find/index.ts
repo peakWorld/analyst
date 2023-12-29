@@ -1,7 +1,7 @@
 import BaseHandler from '../core/bases/handler.js';
 import jtsAst from './ast/jts.js';
 import styleAst from './ast/style.js';
-import templateAst from './ast/template.js';
+import vue2Ast from './ast/vue2.js';
 import { FileType } from '../types/constant.js';
 
 export default class FindHandler extends BaseHandler {
@@ -37,15 +37,15 @@ export default class FindHandler extends BaseHandler {
       handler: jtsAst(this.text),
     });
     this.ctx.addVisitor({
-      type: [FileType.Template],
-      handler: templateAst(this.text),
+      type: [FileType.Vue],
+      handler: vue2Ast(this.text),
     });
   }
 
   async handleEntries() {
-    // const entries = this.ctx.configs.entry;
     const entries = [
       '/Users/windlliu/wk/eyao.miniapp/src/packageDrug/nearSearch/index.vue',
+      // '/Users/windlliu/wk/eyao.miniapp/src/pages/eyao/eyao.vue',
     ];
     for (let entry of entries) {
       await this.handler(entry);

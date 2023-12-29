@@ -11,10 +11,7 @@
     "build:watch": "tsc -w -p tsconfig.json",
     "build:release": "npm run clean && tsc -p tsconfig.release.json",
     "lint": "eslint . --ext .ts --ext .mts",
-    "prettier": "prettier --config .prettierrc --write .",
-    "watch:postxml": "concurrently \"npm run watch\" \"npm run postxml\"",
-    "postxml": "cross-env nodemon build/src/lib/postxml/index.js",
-    "watch": "tsc ./src/lib/postxml -w -p tsconfig.json"
+    "prettier": "prettier --config .prettierrc --write ."
   },
   "bin": {
     "sable": "./build/src/main.js"
@@ -30,14 +27,16 @@
     "esbuild": "^0.19.9",
     "fast-glob": "^3.3.2",
     "fs-extra": "^11.1.1",
+    "lodash": "^4.17.21",
     "postcss": "^8.4.32",
     "postcss-less": "^6.0.0",
     "postcss-scss": "^4.0.9",
-    "vue-template-compiler": "^2.7.15"
+    "vue-template-compiler": "^2.7.16"
   },
   "devDependencies": {
     "@types/babel__core": "^7.20.5",
     "@types/fs-extra": "^11.0.1",
+    "@types/lodash": "^4.14.202",
     "@types/node": "~16",
     "@types/postcss-less": "^4.0.6",
     "@typescript-eslint/eslint-plugin": "~5.26",

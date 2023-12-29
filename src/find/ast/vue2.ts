@@ -1,4 +1,4 @@
-import type { Visitor } from '../../lib/postxml/index.js';
+import type { Visitor } from 'vue-template-compiler';
 import type { Context } from '../../types/clipanion.js';
 
 export default (search: string) => (ctx: Context) => {

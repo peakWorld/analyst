@@ -1,4 +1,5 @@
 import path from 'node:path';
+import _ from 'lodash';
 import fs from 'fs-extra';
 import { wkspace } from './constant.js';
 import { FileType } from '../types/constant.js';
@@ -60,11 +61,10 @@ export function getAbsByAlias(alias: Record<string, string>, url: string) {
     return url;
   }
 
-  const aliasTmp = alias.filter_(['@', '~']);
-  const [v, k] = aliasTmp._get(url, (v) => url.startsWith(v));
-
-  if (!v) return '';
-
+  const aliasTmp = _.omit(alias, ['@', '~']);
+  const tmp = _.pickBy(aliasTmp, (v) => url.startsWith(v));
+  if (_.isEmpty(tmp)) return '';
+  const [[k, v]] = _.toPairs(tmp);
   url = url.replace(k, v);
   return url;
 }

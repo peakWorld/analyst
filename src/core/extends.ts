@@ -1,3 +1,12 @@
+// TODO
+
+// 有如下issue
+// node_modules/vue-template-compiler/build.js
+// ```js
+// function genHandlers => 3775行要新增如下代码
+// `if (!hasOwnProperty.call(events, name)) continue;`
+// ```
+
 /************** Object.prototype ***************/
 
 const hasOwn = Object.prototype.hasOwnProperty;

@@ -2,6 +2,7 @@
  * Uniapp全局配置文档 https://zh.uniapp.dcloud.io/collocation/pages.html#easycom
  */
 import path from 'node:path';
+import _ from 'lodash';
 import BaseRoute from '../bases/route.js';
 import {
   readFileToExcuteJs,
@@ -76,7 +77,7 @@ export default class UniappRoute extends BaseRoute {
 
   // uniapp 特殊配置
   async resolveEasycom() {
-    this.original?.easycom?.custom?._forEach((v, k) => {
+    _.forOwn(this.original?.easycom?.custom ?? {}, (v, k) => {
       const absUrl = getAbsByAlias(this.alias, v);
       if (!absUrl) return;
       this.handlers.push({
@@ -96,7 +97,7 @@ export default class UniappRoute extends BaseRoute {
     // TODO 静态文件未处理
 
     // 微信原生组建
-    this.original?.globalStyle?.usingComponents?._forEach(() => {
+    _.forOwn(this.original?.globalStyle?.usingComponents ?? {}, () => {
       // TODO 微信原生开发解析
       // if (v.startsWith('/')) {
       //   v = v.slice(1);
@@ -118,7 +119,8 @@ export default class UniappRoute extends BaseRoute {
       leftWindow: this.original?.leftWindow?.path,
       rightWindow: this.original?.rightWindow?.path,
     };
-    windows._forEach((v, k) => {
+
+    _.forOwn(windows, (v, k) => {
       if (!v) return;
       this.routes.push(
         setRoute(this.setAbsNoExt(v), undefined, { original: k }),

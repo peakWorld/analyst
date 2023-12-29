@@ -1,7 +1,7 @@
 import { Command, Option } from 'clipanion';
+import Logger from '../log.js';
 import type { Context } from '../../types/clipanion.js';
 import type { CommandKey } from '../../types/constant.js';
-import Logger from '../log.js';
 
 export default abstract class BaseCommand extends Command<Context> {
   verbose = Option.Boolean('-v,--verbose', false, {

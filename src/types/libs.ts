@@ -52,7 +52,7 @@ export type ResolvedVisitor = {
     ? Array<StyleVisitor>
     : T extends FileType.Js | FileType.Ts
     ? Array<JsVisitor>
-    : T extends FileType.Html | FileType.Template
+    : T extends FileType.Html
     ? Array<TemplateVisitor>
     : any[];
 };

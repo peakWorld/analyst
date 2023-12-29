@@ -30,3 +30,13 @@ export default class FindCommand extends BaseCommand {
     new FindHandler(this.context).setup(this.text); // 执行逻辑
   }
 }
+
+if (process.env.NODE_ENV === 'debug') {
+  (async () => {
+    import('../core/extends.js');
+    const instance = new FindCommand();
+    instance.context = {} as any;
+    instance.verbose = false;
+    instance.execute();
+  })();
+}

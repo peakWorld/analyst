@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import _ from 'lodash';
 import {
   space,
   wkName,
@@ -81,13 +82,13 @@ export default abstract class BaseHandler {
 
   private async resolveAlias() {
     const { alias } = this.commandConfigs;
-    return alias._map<typeof alias>((v) => getAbsHasExt(v));
+    return _.mapValues(alias, (v) => getAbsHasExt(v));
   }
 
   private async resolveFrame(): Promise<Partial<ResolvedFrame>> {
     const commadnFrames = this.commandConfigs.frames;
     const { dependencies, devDependencies } = this.pkgJson;
-    const deps = dependencies.merge_([devDependencies]);
+    const deps = _.assign({}, dependencies, devDependencies);
     const frames = {} as ResolvedFrame;
     if (deps.vue) {
       const v = getVersion(deps.vue);
@@ -111,7 +112,7 @@ export default abstract class BaseHandler {
     // 对象处理
     if (!t.isArray(routes)) {
       const resolved = [];
-      routes._forEach((v, k) => resolved.push(setRoute(v, k)));
+      _.forOwn(routes, (v, k) => resolved.push(setRoute(v, k)));
       return { routes: resolved, handlers: [] };
     }
 

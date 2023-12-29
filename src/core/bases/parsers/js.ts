@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import _ from 'lodash';
 import traverse from '@babel/traverse';
 import generate, { type GeneratorOptions } from '@babel/generator';
 import parser, { type ParserOptions } from '@babel/parser';
@@ -27,7 +28,7 @@ export default class JsParser {
 
   private mergeOptions() {
     // TODO 根据文件类型区分参数
-    this._options = BASE_OPTIONS.merge_([this.options?.options ?? {}]);
+    this._options = _.merge({}, BASE_OPTIONS, this.options?.options ?? {});
   }
 
   constructor(
