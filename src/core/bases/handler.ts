@@ -189,16 +189,16 @@ export default abstract class BaseHandler {
   }
 
   async handler(fileUrl: string) {
-    const { visitors, current } = this.ctx;
+    const { visitors, current, configs } = this.ctx;
     const { handled, pending } = current;
     this.ctx.addR_Pending(fileUrl);
 
     while (pending.length) {
       fileUrl = pending.shift();
-      // console.log('handler fileUrl', fileUrl);
 
       if (!fileUrl || handled.has(fileUrl)) continue;
-      const { processing, type } = this.ctx.setR_Now(fileUrl);
+
+      const { type } = this.ctx.setR_Now(fileUrl);
       switch (type) {
         case FileType.Css:
         case FileType.Less:
@@ -216,15 +216,14 @@ export default abstract class BaseHandler {
           }
           break;
         case FileType.Vue:
-          {
-            await new Vue2Parser(this.ctx, processing).setup();
+          if (configs.frames?.vue2) {
+            await new Vue2Parser(this.ctx, fileUrl).setup();
           }
           break;
 
         default:
         // TODO NOTHING
       }
-      console.log('pending.length...');
     }
 
     this.ctx.restR_Current();

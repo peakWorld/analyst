@@ -1,7 +1,7 @@
 import BaseHandler from '../core/bases/handler.js';
-import jtsAst from './ast/jts.js';
-import styleAst from './ast/style.js';
-import vue2Ast from './ast/vue2.js';
+import jtsVisitor from './visitor/jts.js';
+import styleVisitor from './visitor/style.js';
+import vue2Visitor from './visitor/vue2.js';
 import { FileType } from '../types/constant.js';
 
 export default class FindHandler extends BaseHandler {
@@ -16,29 +16,20 @@ export default class FindHandler extends BaseHandler {
 
     await this.handleEntries();
     // await this.handleRoutes();
-
-    // Vue
-    // const fileUrl =
-    //   '/Users/windlliu/wk/eyao.miniapp/src/packageDrug/nearSearch/index.vue';
-
-    // Style
-    // const fileUrl2 = '/Users/windlliu/wk/eyao.miniapp/src/uni.scss';
-    // const fileUrl =
-    //   '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/index.less';
   }
 
   async setVisitors() {
     this.ctx.addVisitor({
       type: [FileType.Css, FileType.Less, FileType.Scss],
-      handler: styleAst(this.text),
+      handler: styleVisitor(this.text),
     });
     this.ctx.addVisitor({
       type: [FileType.Js, FileType.Ts],
-      handler: jtsAst(this.text),
+      handler: jtsVisitor(this.text),
     });
     this.ctx.addVisitor({
       type: [FileType.Vue],
-      handler: vue2Ast(this.text),
+      handler: vue2Visitor(this.text),
     });
   }
 

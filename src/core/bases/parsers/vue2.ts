@@ -4,11 +4,7 @@ import compiler from 'vue-template-compiler';
 import JsParser from './js.js';
 import StyleParser from './style.js';
 import { FileType } from '../../../types/constant.js';
-import {
-  getAbsHasExt,
-  t,
-  saveDataToTmpJsonFile,
-} from '../../../utils/index.js';
+import { getAbsHasExt, t } from '../../../utils/index.js';
 import type { Context } from '../../../types/clipanion.js';
 import type { Visitor, Ctx, Node } from 'vue-template-compiler';
 
@@ -33,7 +29,7 @@ export default class Vue2Parser {
     }
     if (!ctx.currentNode) return;
 
-    if (node.type === 1) {
+    if (node.type === 1 || node.type === 0) {
       const children = node.children;
       if (children.length) {
         for (let i = 0; i < children.length; i++) {
@@ -94,7 +90,6 @@ export default class Vue2Parser {
   }
 
   parseDsl(code: string) {
-    saveDataToTmpJsonFile({ code }, '2');
     const { ast } = compiler.compile(code);
     this.ast = {
       type: 0,
