@@ -130,23 +130,23 @@ export default abstract class BaseHandler {
   }
 
   // TODO 分离出去
-  private extendCtx() {
+  private extendContext() {
     this.ctx.appeared = new Set();
     this.ctx.current = {
       processing: '',
-      loaded: false,
+      path: '',
       pending: [],
       handled: new Set(),
       type: undefined,
     };
     this.ctx.visitors = {} as ResolvedVisitor;
 
-    this.ctx.setR_Now = (fileUrl) => {
+    this.ctx.setR_Now = (fileUrl, path) => {
       this.ctx.appeared.add(fileUrl);
       this.ctx.current.handled.add(fileUrl);
       this.ctx.current.processing = fileUrl;
       this.ctx.current.type = getExt(fileUrl);
-      this.ctx.current.loaded = false;
+      this.ctx.current.path = path;
       return this.ctx.current;
     };
     this.ctx.addR_Pending = (fileUrl) => {
@@ -157,7 +157,7 @@ export default abstract class BaseHandler {
     this.ctx.restR_Current = () => {
       this.ctx.current.handled.clear();
       this.ctx.current.pending.length = 0;
-      this.ctx.current.loaded = false;
+      this.ctx.current.path = '';
       this.ctx.current.processing = '';
     };
     this.ctx.addRoute = (fileUrl: string, path?: string, extra?: AnyObj) => {
@@ -185,10 +185,10 @@ export default abstract class BaseHandler {
   constructor(protected ctx: Context) {
     this.ctx.logger.log(`Class Entity Created!`);
     this.pkgJson = getWkPkgJson();
-    this.extendCtx();
+    this.extendContext();
   }
 
-  async handler(fileUrl: string) {
+  async handler(fileUrl: string, path?: string) {
     const { visitors, current, configs } = this.ctx;
     const { handled, pending } = current;
     this.ctx.addR_Pending(fileUrl);
@@ -198,7 +198,7 @@ export default abstract class BaseHandler {
 
       if (!fileUrl || handled.has(fileUrl)) continue;
 
-      const { type } = this.ctx.setR_Now(fileUrl);
+      const { type } = this.ctx.setR_Now(fileUrl, path);
       switch (type) {
         case FileType.Css:
         case FileType.Less:

@@ -2,8 +2,9 @@ import { Command, Option } from 'clipanion';
 import FindHandler from './index.js';
 import BaseCommand from '../core/bases/command.js';
 import { CommandKey } from '../types/constant.js';
+import type { Ctx } from './interface.js';
 
-export default class FindCommand extends BaseCommand {
+export default class FindCommand extends BaseCommand<Ctx> {
   static paths = [[`find`]];
 
   static usage = Command.Usage({
@@ -27,7 +28,7 @@ export default class FindCommand extends BaseCommand {
 
   async execute() {
     this.setup(CommandKey.FIND);
-    new FindHandler(this.context).setup(this.text); // 执行逻辑
+    new FindHandler(this.context, this.text).setup(); // 执行逻辑
   }
 }
 
@@ -37,6 +38,7 @@ if (process.env.NODE_ENV === 'debug') {
     const instance = new FindCommand();
     instance.context = {} as any;
     instance.verbose = false;
+    instance.text = 'xxx';
     instance.execute();
   })();
 }
