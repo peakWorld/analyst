@@ -1,13 +1,28 @@
+import { MatchHandlerType } from '../../types/constant.js';
 import type { Visitor } from 'vue-template-compiler';
 import type { Ctx } from '../interface.js';
 
 export default (search: string) => (ctx: Ctx) => {
   const mul = search.split(',');
-  console.log('vue2 mul', search, mul);
+  // 自定义组建(标签)处理
+  const handlers = ctx.configs.handlers?.filter(
+    (it) => it.type === MatchHandlerType.Tag,
+  );
 
   const visitor: Visitor = {
     Element(node) {
       const { tag, attrsList } = node;
+
+      if (handlers.length) {
+        handlers.forEach(({ match, handler }) => {
+          if (match.test(tag)) {
+            const matches = match.exec(tag);
+            const url = handler(matches[1]);
+            ctx.addR_Pending(url);
+          }
+        });
+      }
+
       if (mul.find((it) => tag.includes(it))) {
         return ctx.addFind_Result();
       }

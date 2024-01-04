@@ -6,7 +6,7 @@ import { FileType } from '../types/constant.js';
 import { Ctx } from './interface.js';
 
 export default class FindHandler extends BaseHandler {
-  private result = [];
+  private result = new Set<string>();
 
   constructor(protected ctx: Ctx, private text: string) {
     super(ctx);
@@ -18,8 +18,8 @@ export default class FindHandler extends BaseHandler {
     if (!this.text) throw new Error('查询条件为空!');
 
     await this.initCommandConfigs();
-    await this.handleEntries();
-    // await this.handleRoutes();
+    // await this.handleEntries();
+    await this.handleRoutes();
 
     console.log('result', this.result);
   }
@@ -28,9 +28,9 @@ export default class FindHandler extends BaseHandler {
     this.ctx.addFind_Result = () => {
       const { current } = this.ctx;
       if (current.path) {
-        this.result.push(current.path);
+        this.result.add(current.path);
+        this.ctx.restR_Current();
       }
-      this.ctx.restR_Current();
     };
   }
 
@@ -50,10 +50,11 @@ export default class FindHandler extends BaseHandler {
   }
 
   async handleEntries() {
-    const entries = [
-      '/Users/windlliu/wk/eyao.miniapp/src/packageDrug/nearSearch/index.vue',
-      // '/Users/windlliu/wk/eyao.miniapp/src/pages/eyao/eyao.vue',
-    ];
+    const { entry: entries } = this.ctx.configs;
+    // const entries = [
+    //   // '/Users/windlliu/wk/eyao.miniapp/src/packageMy/my/history/index.vue',
+    //   '/Users/windlliu/wk/eyao.miniapp/src/config/page.js',
+    // ];
     for (let entry of entries) {
       await this.handler(entry, entry);
     }

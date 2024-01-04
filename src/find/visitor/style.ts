@@ -1,8 +1,9 @@
+import { clearQuotes, getAbsUrlInAst } from '../../utils/index.js';
 import type { PluginCreator, ProcessOptions } from 'postcss';
 import type { Ctx } from '../interface.js';
-import { saveDataToTmpJsonFile } from '../../utils/index.js';
+import type StyleParser from '../../core/bases/parsers/style.js';
 
-export default (search: string) => (ctx: Ctx) => {
+export default (search: string) => (ctx: Ctx, parser: StyleParser) => {
   const mul = search.split(',');
 
   // 可用规则位于 postcss.d.ts => Processors
@@ -10,19 +11,15 @@ export default (search: string) => (ctx: Ctx) => {
     postcssPlugin: 'postcss-find',
     AtRule: {
       import(rule) {
-        console.log('import', rule.toString());
-      },
-      '*'(rule) {
-        saveDataToTmpJsonFile(rule, 'AtRule');
-        // console.log('*', rule.toString());
+        if (!rule.params) return;
+        const urls = getAbsUrlInAst(ctx, clearQuotes(rule.params), true);
+        urls.forEach((url) => ctx.addR_Pending(url));
       },
     },
-    Declaration(decl) {
-      saveDataToTmpJsonFile(decl, 'decl');
-      // console.log('decl', decl);
-    },
-    Rule(rule) {
-      saveDataToTmpJsonFile(rule, 'rule');
+    OnceExit() {
+      if (mul.find((it) => parser.source.includes(it))) {
+        return ctx.addFind_Result();
+      }
     },
   });
   plugin.postcss = true;

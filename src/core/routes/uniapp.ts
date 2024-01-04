@@ -80,14 +80,16 @@ export default class UniappRoute extends BaseRoute {
     _.forOwn(this.original?.easycom?.custom ?? {}, (v, k) => {
       const absUrl = getAbsByAlias(this.alias, v);
       if (!absUrl) return;
+
       this.handlers.push({
         type: MatchHandlerType.Tag,
         match: new RegExp(`${k}`),
         handler: (...matches: string[]) => {
+          let tmpUrl = absUrl;
           matches?.forEach((match, i) => {
-            v = v.replace(`$${i + 1}`, match);
+            tmpUrl = tmpUrl.replace(`$${i + 1}`, match);
           });
-          return v;
+          return tmpUrl;
         },
       });
     });

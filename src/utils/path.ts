@@ -4,18 +4,27 @@ import fs from 'fs-extra';
 import { wkspace } from './constant.js';
 import { FileType } from '../types/constant.js';
 import type { ResolvedFrame } from '../types/libs.js';
+import type { Context } from '../types/clipanion.js';
+
+export function getStyleFileTye(frame: Partial<ResolvedFrame>) {
+  const exts = [FileType.Css];
+  if (frame.less) exts.push(FileType.Less);
+  if (frame.scss) exts.push(FileType.Scss);
+  return exts;
+}
 
 /**
  * 根据frame细分 getAbsByMatchExts函数要匹配的文件后缀
  */
-export function getMatchFileType(frame: Partial<ResolvedFrame>, isCss = false) {
-  if (isCss) {
-    let exts = [FileType.Css];
-    if (frame.less) exts.push(FileType.Less);
-    if (frame.scss) exts.push(FileType.Scss);
-    return exts;
+export function getMatchFileType(
+  frame: Partial<ResolvedFrame>,
+  withCss = false,
+) {
+  let exts = [];
+  if (withCss) {
+    exts = getStyleFileTye(frame);
   }
-  let exts = [FileType.Js];
+  exts.push(FileType.Js);
   if (frame.ts) exts.push(FileType.Ts);
   if (frame.react) {
     exts.push(FileType.Jsx);
@@ -39,9 +48,9 @@ export function getAbsByAliasInCss(alias: Record<string, string>, url: string) {
 }
 
 /**
- * 获取文件的绝对路径(别名路径)
+ * 获取绝对路径(别名路径)
  *
- * 根据alias别名, 将路径替换成绝对路径
+ * 根据alias别名, 将路径替换成绝对路径 => 结果可能无后缀
  * alias: { @/x: '/xx' }
  * url: @/x/abc.js | @/x/ab
  *
@@ -70,7 +79,7 @@ export function getAbsByAlias(alias: Record<string, string>, url: string) {
 }
 
 /**
- * 获取文件的绝对路径(无后缀)
+ * 获取绝对路径(无后缀)
  *
  * 由绝对路径、可能的文件后缀 => 查找相应的系统文件
  * fileUrl: /xxx/xx
@@ -84,7 +93,7 @@ export function getAbsByMatchExts(fileUrl: string, exts: FileType[]) {
     if (stat.isDirectory()) {
       return getAbsByMatchExts(`${fileUrl}/index`, exts);
     }
-    return fileUrl;
+    return [fileUrl];
   }
 
   return exts
@@ -93,17 +102,17 @@ export function getAbsByMatchExts(fileUrl: string, exts: FileType[]) {
 }
 
 /**
- * 获取文件的绝对路径(有后缀)
+ * 获取绝对路径(相对路径)
  *
  * fileUrl: ./xx.js | xx.js
  * prefix: /xx
  *
  * 相对于prefix获取绝对路径 /xx/x.js
  */
-export function getAbsHasExt(fileUrl: string, prefix = wkspace) {
+export function getAbsByRelative(fileUrl: string, prefix = wkspace) {
   if (path.isAbsolute(fileUrl)) return fileUrl;
 
-  if (/\.{1,2}\//.test(fileUrl) && prefix === wkspace)
+  if (isInRelative(fileUrl) && prefix === wkspace)
     return fs.realpathSync(fileUrl);
 
   return path.join(prefix, fileUrl);
@@ -126,4 +135,40 @@ export function matchFileAbsUrlsInWx(fileUrl: string, extraExts?: FileType[]) {
 
 export function checkIsFileUrl(codeOrUrl: string, exts: string[]) {
   return new RegExp(`.+\\.(${exts.join('|')})$`).test(codeOrUrl);
+}
+
+export function isInAlias(alias: Record<string, string>, url: string) {
+  if (['@/', '~/'].find((it) => url.startsWith(it))) return true;
+  const aliasTmp = _.omit(alias, ['@', '~']);
+  if (Object.keys(aliasTmp).some((k) => url.startsWith(k))) return true;
+  return false;
+}
+
+export function isInRelative(url: string) {
+  return /^\.{1,2}\//.test(url);
+}
+
+/**
+ * 将别名或相对路径 转成绝对路径
+ *
+ * @/xx | ../xx => /../xx
+ */
+export function getAbsUrlInAst(ctx: Context, fileUrl: string, inStyle = false) {
+  let urls = [];
+  const { frames, alias } = ctx.configs;
+
+  const exts = inStyle
+    ? getStyleFileTye(frames)
+    : getMatchFileType(frames, true);
+
+  if (isInAlias(alias, fileUrl)) {
+    urls = getAbsByMatchExts(getAbsByAlias(alias, fileUrl), exts);
+  }
+  if (isInRelative(fileUrl)) {
+    urls = getAbsByMatchExts(
+      getAbsByRelative(fileUrl, path.dirname(ctx.current.processing)),
+      exts,
+    );
+  }
+  return urls;
 }

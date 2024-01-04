@@ -4,11 +4,13 @@ import compiler from 'vue-template-compiler';
 import JsParser from './js.js';
 import StyleParser from './style.js';
 import { FileType } from '../../../types/constant.js';
-import { getAbsHasExt, t } from '../../../utils/index.js';
+import { getAbsByRelative, t } from '../../../utils/index.js';
 import type { Context } from '../../../types/clipanion.js';
 import type { Visitor, Ctx, Node } from 'vue-template-compiler';
 
-export type Vue2Visitor = Visitor | ((ctx: Context) => Visitor);
+export type Vue2Visitor =
+  | Visitor
+  | ((ctx: Context, parser: Vue2Parser) => Visitor);
 
 export const NodeTypes = {
   0: 'once',
@@ -19,6 +21,8 @@ export const NodeTypes = {
 
 export default class Vue2Parser {
   private ast!: Node;
+
+  source!: string; // 模板源代码
 
   private traverse(node: Node, visitor: Visitor, ctx: Ctx) {
     ctx.currentNode = node;
@@ -54,16 +58,17 @@ export default class Vue2Parser {
     const { template, script, styles } = compiler.parseComponent(code);
     const { visitors, configs } = this.ctx;
 
-    if (template.content) {
-      this.parseDsl(template.content);
+    if (template?.content) {
+      this.source = template.content;
+      this.parseDsl();
       visitors[FileType.Vue]?.forEach((visitor) => this.traverseDsl(visitor));
     }
-    if (script.content) {
+    if (script?.content) {
       const type = configs.frames?.ts ? FileType.Ts : FileType.Js;
       const parser = new JsParser(this.ctx, { type, code: script.content });
       visitors[type].forEach((visitor) => parser.traverse(visitor));
     }
-    if (styles.length) {
+    if (styles?.length) {
       // 未设置lang属性的style标签, 默认为Css
       // 如果同一个文件中有些设置了lang、有些没有设置lang, 则以同文件内的lang为准
       let tmpType = FileType.Css;
@@ -78,7 +83,7 @@ export default class Vue2Parser {
         const type = (lang ?? tmpType) as FileType.Css; // TODO 类型断言
         if (src) {
           this.ctx.addR_Pending(
-            getAbsHasExt(src, path.dirname(this.ctx.current.processing)),
+            getAbsByRelative(src, path.dirname(this.ctx.current.processing)),
           );
         }
         if (content) {
@@ -89,8 +94,8 @@ export default class Vue2Parser {
     }
   }
 
-  parseDsl(code: string) {
-    const { ast } = compiler.compile(code);
+  parseDsl() {
+    const { ast } = compiler.compile(this.source);
     this.ast = {
       type: 0,
       children: [ast],
@@ -98,7 +103,7 @@ export default class Vue2Parser {
   }
 
   traverseDsl(visitor: Vue2Visitor) {
-    const v = t.isFunc(visitor) ? (<any>visitor)(this.ctx) : visitor; // TODO 类型断言
+    const v = t.isFunc(visitor) ? (<any>visitor)(this.ctx, this) : visitor; // TODO 类型断言
     const ctx: Ctx = {
       currentNode: null,
       childIndex: 0,

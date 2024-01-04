@@ -9,7 +9,7 @@ import {
   getVersion,
   loadDynamicModule,
   getAbsByAliasInCss,
-  getAbsHasExt,
+  getAbsByRelative,
   getExt,
   t,
 } from '../../utils/index.js';
@@ -33,9 +33,11 @@ export default abstract class BaseHandler {
   private async loadCommandConfigFile() {
     this.ctx.logger.log(`Loading Command Configs!`);
     // 读取项目相关配置
-    const sourceUrl = getAbsHasExt(`.cache/${this.ctx.key.toLowerCase()}.ts`);
-    const destUrl = getAbsHasExt(`.cache/${wkName}.ts`, space);
-    const templateUrl = getAbsHasExt(`.cache/template.ts`, space);
+    const sourceUrl = getAbsByRelative(
+      `.cache/${this.ctx.key.toLowerCase()}.ts`,
+    );
+    const destUrl = getAbsByRelative(`.cache/${wkName}.ts`, space);
+    const templateUrl = getAbsByRelative(`.cache/template.ts`, space);
 
     // 如果项目不存在该配置文件, 将模板拷贝到当前项目
     if (!fs.existsSync(sourceUrl)) {
@@ -65,7 +67,7 @@ export default abstract class BaseHandler {
     const { routes, handlers } = await this.resolveRoute(frames, alias);
 
     this.ctx.configs = {
-      entry: entry?.map((v) => getAbsHasExt(v)) ?? [],
+      entry: entry?.map((v) => getAbsByRelative(v)) ?? [],
       alias,
       frames,
       handlers,
@@ -82,7 +84,7 @@ export default abstract class BaseHandler {
 
   private async resolveAlias() {
     const { alias } = this.commandConfigs;
-    return _.mapValues(alias, (v) => getAbsHasExt(v));
+    return _.mapValues(alias, (v) => getAbsByRelative(v));
   }
 
   private async resolveFrame(): Promise<Partial<ResolvedFrame>> {
@@ -125,7 +127,7 @@ export default abstract class BaseHandler {
       true,
     );
     const router = new Router(this.ctx, alias, frames);
-    await router.setup(routes.map((v) => getAbsHasExt(v)));
+    await router.setup(routes.map((v) => getAbsByRelative(v)));
     return await router.getRoutesAndHandlers();
   }
 
@@ -195,8 +197,8 @@ export default abstract class BaseHandler {
 
     while (pending.length) {
       fileUrl = pending.shift();
-
       if (!fileUrl || handled.has(fileUrl)) continue;
+      console.log('fileUrl ==> ', fileUrl);
 
       const { type } = this.ctx.setR_Now(fileUrl, path);
       switch (type) {

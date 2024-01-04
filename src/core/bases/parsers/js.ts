@@ -19,12 +19,14 @@ export interface JsParserConfigs {
   options: ParserOptions;
 }
 
-export type JsVisitor = Visitor | ((ctx: Context) => Visitor);
+export type JsVisitor = Visitor | ((ctx: Context, parser: JsParser) => Visitor);
 
 export default class JsParser {
   private ast!: ParseResult;
 
   private _options!: ParserOptions;
+
+  source!: string;
 
   private mergeOptions() {
     // TODO 根据文件类型区分参数
@@ -39,17 +41,18 @@ export default class JsParser {
     if (!sourceCode) {
       sourceCode = fs.readFileSync(ctx.current.processing).toString();
     }
+    this.source = sourceCode;
     this.mergeOptions(); // 编译配置
-    this.parse(sourceCode);
+    this.parse();
   }
 
   traverse(visitor: JsVisitor) {
-    const v = t.isFunc(visitor) ? (<any>visitor)(this.ctx) : visitor; // TODO 类型断言
+    const v = t.isFunc(visitor) ? (<any>visitor)(this.ctx, this) : visitor; // TODO 类型断言
     traverse.default(this.ast, v);
   }
 
-  parse(code: string) {
-    this.ast = parser.parse(code, this._options);
+  parse() {
+    this.ast = parser.parse(this.source, this._options);
   }
 
   generate(options?: GeneratorOptions) {

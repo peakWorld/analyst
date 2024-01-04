@@ -62,3 +62,7 @@ export function setRoute(fileUrl: string, path?: string, extra?: AnyObj) {
   const type = !!path ? RouteType.Reality : RouteType.Virtual;
   return { path, fileUrl, type, extra };
 }
+
+export function clearQuotes(str: string) {
+  return str.replace(/^["']+/, '').replace(/["']+$/, '');
+}

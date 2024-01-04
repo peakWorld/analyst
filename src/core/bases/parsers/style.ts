@@ -15,22 +15,25 @@ export interface StyleParserConfigs {
   options: ProcessOptions;
 }
 
-export type PluginCb = (ctx: Context) => PluginCreator<ProcessOptions>;
+export type PluginCb = (
+  ctx: Context,
+  parser: StyleParser,
+) => PluginCreator<ProcessOptions>;
 export type StyleVisitor = PluginCb | PluginCreator<ProcessOptions>;
 
 export default class StyleParser {
   private processor!: Processor;
 
-  private sourceCode!: string;
-
   private _options!: ProcessOptions;
+
+  source!: string;
 
   private async mergeOptions() {
     if (!this._options) {
       let syntax = null;
       switch (this.options?.type) {
         case FileType.Less:
-          syntax = await import('postcss-less');
+          syntax = (await import('postcss-less')).default;
           break;
         case FileType.Scss:
           syntax = await import('postcss-scss');
@@ -52,21 +55,21 @@ export default class StyleParser {
     if (!sourceCode) {
       sourceCode = fs.readFileSync(ctx.current.processing).toString();
     }
-    this.sourceCode = sourceCode;
+    this.source = sourceCode;
     this.processor = postcss();
   }
 
-  async traverse(plugin: StyleVisitor[]) {
-    if (t.isArray(plugin)) {
-      plugin.forEach((p) => {
-        const tmp = <any>p;
-        if (tmp.postcss) {
-          this.processor.use(tmp);
+  async traverse(plugins: StyleVisitor[]) {
+    if (t.isArray(plugins)) {
+      plugins.forEach((p) => {
+        const plugin = <any>p; // TODO
+        if (plugin.postcss) {
+          this.processor.use(plugin);
         } else {
-          this.processor.use(tmp(this.ctx));
+          this.processor.use(plugin(this.ctx, this));
         }
       });
     }
-    await this.processor.process(this.sourceCode, await this.mergeOptions());
+    await this.processor.process(this.source, await this.mergeOptions());
   }
 }
