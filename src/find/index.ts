@@ -51,10 +51,6 @@ export default class FindHandler extends BaseHandler {
 
   async handleEntries() {
     const { entry: entries } = this.ctx.configs;
-    // const entries = [
-    //   // '/Users/windlliu/wk/eyao.miniapp/src/packageMy/my/history/index.vue',
-    //   '/Users/windlliu/wk/eyao.miniapp/src/config/page.js',
-    // ];
     for (let entry of entries) {
       await this.handler(entry, entry);
     }

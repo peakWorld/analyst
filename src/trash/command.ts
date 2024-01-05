@@ -12,19 +12,19 @@ export default class TrashCommand extends Command<Context> {
     details: `
       1、分析项目
       2、删除无用文件
-      3、迁移目录文件
+      3、迁移项目文件
 
       注: 在项目工作区间执行命令。
     `,
     examples: [
-      [`分析项目`, `$0 trash -e xx`],
-      [`删除无用文件`, `$0 trash -e xx -d`],
-      [`迁移目录文件`, `$0 trash -e xx -m`],
+      [`分析项目`, `$0 trash`],
+      [`删除无用文件`, `$0 trash -d`],
+      [`迁移项目文件`, `$0 trash -m`],
     ],
   });
 
-  entry = Option.String('-e,--entry', {
-    description: '命令行相关配置文件',
+  analyze = Option.Boolean('-a,--analyze', false, {
+    description: '分析项目',
   });
 
   delete = Option.Boolean('-d,--delete', false, {
@@ -32,7 +32,7 @@ export default class TrashCommand extends Command<Context> {
   });
 
   migrate = Option.Boolean('-m,--migrate', false, {
-    description: '迁移目录文件',
+    description: '迁移项目文件',
   });
 
   async execute() {

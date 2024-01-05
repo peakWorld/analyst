@@ -1,8 +1,8 @@
 # 分析项目
 
 ## 项目开发
-* 执行`npm run build:watch`, 开启文件监听
-* 执行`npm start`, 启动项目
+* cd进当前目录, 执行`npm run build:watch` => 开启文件监听
+* cd进项目路径, 执行`sable find -t xxx` => 执行逻辑处理
 
 ## 链接命令行
 * 执行`sudo npm link`

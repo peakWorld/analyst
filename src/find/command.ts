@@ -18,7 +18,7 @@ export default class FindCommand extends BaseCommand<Ctx> {
 
       注: 在项目工作区间执行命令。
     `,
-    examples: [[`基本例子`, `$0 stash -t xx`]],
+    examples: [[`基本例子`, `$0 find -t xx`]],
   });
 
   text = Option.String('-t,--text', {
@@ -34,7 +34,6 @@ export default class FindCommand extends BaseCommand<Ctx> {
 
 if (process.env.NODE_ENV === 'debug') {
   (async () => {
-    import('../core/extends.js');
     const instance = new FindCommand();
     instance.context = {} as any;
     instance.verbose = false;
