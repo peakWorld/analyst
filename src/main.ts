@@ -9,7 +9,7 @@ import FindCommand from './find/command.js';
 const [node, app, ...args] = process.argv;
 
 const cli = new Cli({
-  binaryName: `sable`,
+  binaryName: `himly`,
   binaryLabel: `命令行工具: ${node} ${app}`,
   binaryVersion: `0.0.1`,
 });

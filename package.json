@@ -14,7 +14,7 @@
     "prettier": "prettier --config .prettierrc --write ."
   },
   "bin": {
-    "sable": "./build/src/main.js"
+    "himly": "./build/src/main.js"
   },
   "author": "",
   "license": "Apache-2.0",

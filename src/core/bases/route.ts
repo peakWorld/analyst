@@ -20,6 +20,8 @@ export default abstract class BaseRoute {
    * 只有两种路由
    * 真实路由 路径 => 文件地址
    * 虚拟路由 virtual:x => 文件地址
+   *
+   * 正则模式路由, 则直接处理得到真实路由
    */
   protected routes!: ResolvedRoute[];
 
