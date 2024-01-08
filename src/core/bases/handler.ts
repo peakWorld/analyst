@@ -52,7 +52,7 @@ export default abstract class BaseHandler {
       : getConfigs);
     this.commandConfigs = configs;
 
-    this.ctx.logger.log('Loaded Command Configs：', this.commandConfigs);
+    this.ctx.logger.log('Loaded Command Configs', this.commandConfigs);
   }
 
   private async resolveCommandConfig() {
@@ -79,7 +79,7 @@ export default abstract class BaseHandler {
       this.ctx.configs.entry.push(getAbsByAliasInCss(alias, v));
     });
 
-    this.ctx.logger.log(`Resolved Command Configs：`, this.ctx.configs);
+    this.ctx.logger.log(`Resolved Command Configs`, this.ctx.configs);
   }
 
   private async resolveAlias() {
@@ -198,7 +198,7 @@ export default abstract class BaseHandler {
     while (pending.length) {
       fileUrl = pending.shift();
       if (!fileUrl || handled.has(fileUrl)) continue;
-      console.log('fileUrl ==> ', fileUrl);
+      // this.ctx.logger.log(fileUrl);
 
       const { type } = this.ctx.setR_Now(fileUrl, path);
       switch (type) {

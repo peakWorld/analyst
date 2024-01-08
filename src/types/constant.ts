@@ -1,6 +1,7 @@
 /** 命令行类型 */
 export enum CommandKey {
   FIND = 'Find',
+  ConvertStyle = 'convert:style',
 }
 
 /** 匹配处理类型 */
