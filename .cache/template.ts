@@ -14,5 +14,10 @@ export default () => {
 
     // 路径别名 TODO
     alias: {},
+
+    // 命令行特定配置
+    convert: {
+      style: {},
+    },
   };
 };

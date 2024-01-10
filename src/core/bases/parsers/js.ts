@@ -24,14 +24,7 @@ export type JsVisitor = Visitor | ((ctx: Context, parser: JsParser) => Visitor);
 export default class JsParser {
   private ast!: ParseResult;
 
-  private _options!: ParserOptions;
-
   source!: string;
-
-  private mergeOptions() {
-    // TODO 根据文件类型区分参数
-    this._options = _.merge({}, BASE_OPTIONS, this.options?.options ?? {});
-  }
 
   constructor(
     protected ctx: Context,
@@ -42,8 +35,12 @@ export default class JsParser {
       sourceCode = fs.readFileSync(ctx.current.processing).toString();
     }
     this.source = sourceCode;
-    this.mergeOptions(); // 编译配置
     this.parse();
+  }
+
+  mergeOptions() {
+    // TODO 根据文件类型区分参数
+    return _.merge({}, BASE_OPTIONS, this.options?.options ?? {});
   }
 
   traverse(visitor: JsVisitor) {
@@ -52,10 +49,11 @@ export default class JsParser {
   }
 
   parse() {
-    this.ast = parser.parse(this.source, this._options);
+    const options = this.mergeOptions(); // 编译配置
+    this.ast = parser.parse(this.source, options);
   }
 
-  generate(options?: GeneratorOptions) {
+  generateCode(options?: GeneratorOptions) {
     return generate.default(this.ast, options);
   }
 }

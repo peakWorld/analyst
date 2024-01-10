@@ -5,11 +5,19 @@ import type { TemplateVisitor } from '../core/bases/parsers/template.js';
 
 // 项目命令行配置
 export interface SableConfigs {
+  // 公共配置
   entry: string[]; // 入口文件
   routes: string[] | Record<string, string>; // 路由入口文件<fileUrl>|路由配置<route,fileUrl>
   frames: string[]; // 框架有特殊配置 uniapp|nextjs
   styles: Array<string>; // 全局样式文件
   alias: Record<string, string>; // 别名
+
+  // 命令行专属配置
+  convert?: {
+    style?: {
+      to: FileType;
+    };
+  };
 }
 
 // 解析后配置

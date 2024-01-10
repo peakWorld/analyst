@@ -1,8 +1,6 @@
 import path from 'node:path';
 import fs from 'fs-extra';
 import compiler from 'vue-template-compiler';
-import JsParser from './js.js';
-import StyleParser from './style.js';
 import { FileType } from '../../../types/constant.js';
 import { getAbsByRelative, t } from '../../../utils/index.js';
 import type { Context } from '../../../types/clipanion.js';
@@ -23,6 +21,8 @@ export default class Vue2Parser {
   private ast!: Node;
 
   source!: string; // 模板源代码
+
+  contents = { template: '', script: '', styles: [] }; // generate
 
   private traverse(node: Node, visitor: Visitor, ctx: Ctx) {
     ctx.currentNode = node;
@@ -51,46 +51,69 @@ export default class Vue2Parser {
     }
   }
 
+  protected parseTemplate(template: string) {
+    const { visitors } = this.ctx;
+    this.source = template;
+    this.parseDsl();
+    visitors[FileType.Vue]?.forEach((visitor) => this.traverseDsl(visitor));
+    return this.source;
+  }
+
+  protected parseScript(content: string) {
+    const { visitors, configs, parsers, generate } = this.ctx;
+    const type = configs.frames?.ts ? FileType.Ts : FileType.Js;
+    const parser = new parsers.js(this.ctx, { type, code: content });
+    visitors[type].forEach((visitor) => parser.traverse(visitor));
+    return generate ? parser.generateCode().code : '';
+  }
+
+  protected async parseStyle(styles: compiler.SFCBlock[]) {
+    const { visitors, parsers, generate } = this.ctx;
+    // 未设置lang属性的style标签, 默认为Css
+    // 如果同一个文件中有些设置了lang、有些没有设置lang, 则以同文件内的lang为准
+    let tmpType = FileType.Css;
+    styles.forEach((style) => {
+      if (style.lang && tmpType !== style.lang) {
+        tmpType = style.lang as FileType;
+      }
+    });
+
+    let result = [];
+    for (let style of styles) {
+      const { lang, content, src } = style;
+      const type = (lang ?? tmpType) as FileType.Css; // TODO 类型断言
+      const tmpStyle = { lang, src, content: '' };
+      if (src) {
+        this.ctx.addR_Pending(
+          getAbsByRelative(src, path.dirname(this.ctx.current.processing)),
+        );
+      }
+      if (content) {
+        const parser = new parsers.style(this.ctx, { type, code: content });
+        await parser.traverse(visitors[type]);
+        if (generate) {
+          tmpStyle.content = await parser.generateCode();
+        }
+      }
+      result.push(tmpStyle);
+    }
+    return result;
+  }
+
   constructor(protected ctx: Context, protected fileUrl: string) {}
 
   async setup() {
     const code = fs.readFileSync(this.fileUrl).toString();
     const { template, script, styles } = compiler.parseComponent(code);
-    const { visitors, configs } = this.ctx;
 
     if (template?.content) {
-      this.source = template.content;
-      this.parseDsl();
-      visitors[FileType.Vue]?.forEach((visitor) => this.traverseDsl(visitor));
+      this.contents.template = this.parseTemplate(template.content);
     }
     if (script?.content) {
-      const type = configs.frames?.ts ? FileType.Ts : FileType.Js;
-      const parser = new JsParser(this.ctx, { type, code: script.content });
-      visitors[type].forEach((visitor) => parser.traverse(visitor));
+      this.contents.script = this.parseScript(script.content);
     }
     if (styles?.length) {
-      // 未设置lang属性的style标签, 默认为Css
-      // 如果同一个文件中有些设置了lang、有些没有设置lang, 则以同文件内的lang为准
-      let tmpType = FileType.Css;
-      styles.forEach((style) => {
-        if (style.lang && tmpType !== style.lang) {
-          tmpType = style.lang as FileType;
-        }
-      });
-
-      for (let style of styles) {
-        const { lang, content, src } = style;
-        const type = (lang ?? tmpType) as FileType.Css; // TODO 类型断言
-        if (src) {
-          this.ctx.addR_Pending(
-            getAbsByRelative(src, path.dirname(this.ctx.current.processing)),
-          );
-        }
-        if (content) {
-          const parser = new StyleParser(this.ctx, { type, code: content });
-          await parser.traverse(visitors[type]);
-        }
-      }
+      this.contents.styles = await this.parseStyle(styles);
     }
   }
 
@@ -110,5 +133,9 @@ export default class Vue2Parser {
       parent: null,
     };
     this.traverse(this.ast, v, ctx);
+  }
+
+  async generate() {
+    // console.log('vue2', this.contents);
   }
 }

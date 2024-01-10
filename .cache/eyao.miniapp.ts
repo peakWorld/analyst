@@ -15,5 +15,12 @@ export default (ctx) => {
       '@': './src',
       discuzq: './src/discuzq',
     },
+
+    // 命令行特定配置
+    convert: {
+      style: {
+        to: 'scss'
+      },
+    },
   };
 };

@@ -2,6 +2,9 @@ import { CommandKey, MatchHandlerType, FileType } from './constant.js';
 import type { BaseContext } from 'clipanion';
 import type Logger from '../core/log.js';
 import type { ResolvedConfigs, ResolvedVisitor, Visitor } from './libs.js';
+import type Vue2Parser from '../core/bases/parsers/vue2.js';
+import type StyleParser from '../core/bases/parsers/style.js';
+import type JsParser from '../core/bases/parsers/js.js';
 
 export interface MatchHandler {
   type: MatchHandlerType;
@@ -17,6 +20,12 @@ export interface Current {
   type: FileType;
 }
 
+export interface Parsers {
+  vue2: typeof Vue2Parser;
+  style: typeof StyleParser;
+  js: typeof JsParser;
+}
+
 export interface Context extends BaseContext {
   key: CommandKey;
   logger: Logger;
@@ -24,6 +33,8 @@ export interface Context extends BaseContext {
   current: Current; // 当前路由的相关信息
   visitors: ResolvedVisitor; // 逻辑处理
   configs: ResolvedConfigs & { handlers: MatchHandler[] }; // 公共配置
+  parsers: Parsers; // 解析器
+  generate: boolean; // 是否重新生成文件
 
   addRoute: (fileUrl: string, path?: string, extra?: AnyObj) => void; // 新增路由
   addVisitor: (visitor: Visitor) => void; // 新增处理逻辑

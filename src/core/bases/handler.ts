@@ -10,23 +10,17 @@ import {
   loadDynamicModule,
   getAbsByAliasInCss,
   getAbsByRelative,
-  getExt,
   t,
 } from '../../utils/index.js';
-import Vue2Parser from '../../core/bases/parsers/vue2.js';
-import StyleParser from '../../core/bases/parsers/style.js';
-import JsParser from '../../core/bases/parsers/js.js';
 import { FileType } from '../../types/constant.js';
-import type {
-  SableConfigs,
-  ResolvedFrame,
-  ResolvedVisitor,
-} from '../../types/libs.js';
+import { expand } from './context.js';
+import type { SableConfigs, ResolvedFrame } from '../../types/libs.js';
 import type { Context } from '../../types/clipanion.js';
 import type { IBaseRoute } from './route.js';
 
-export default abstract class BaseHandler {
-  private commandConfigs!: SableConfigs;
+@expand
+export default class BaseHandler {
+  protected commandConfigs!: SableConfigs;
 
   protected pkgJson!: PackageJson;
 
@@ -129,54 +123,6 @@ export default abstract class BaseHandler {
     return await router.getRoutesAndHandlers();
   }
 
-  // TODO 分离出去
-  private extendContext() {
-    this.ctx.appeared = new Set();
-    this.ctx.current = {
-      processing: '',
-      path: '',
-      pending: [],
-      handled: new Set(),
-      type: undefined,
-    };
-    this.ctx.visitors = {} as ResolvedVisitor;
-
-    this.ctx.setR_Now = (fileUrl, path) => {
-      this.ctx.appeared.add(fileUrl);
-      this.ctx.current.handled.add(fileUrl);
-      this.ctx.current.processing = fileUrl;
-      this.ctx.current.type = getExt(fileUrl);
-      this.ctx.current.path = path;
-      return this.ctx.current;
-    };
-    this.ctx.addR_Pending = (fileUrl) => {
-      const { pending } = this.ctx.current;
-      if (pending.includes(fileUrl)) return;
-      this.ctx.current.pending.push(fileUrl);
-    };
-    this.ctx.restR_Current = () => {
-      this.ctx.current.handled.clear();
-      this.ctx.current.pending.length = 0;
-      this.ctx.current.path = '';
-      this.ctx.current.processing = '';
-    };
-    this.ctx.addRoute = (fileUrl: string, path?: string, extra?: AnyObj) => {
-      const route = setRoute(fileUrl, path, extra);
-      this.ctx.configs.routes.push(route);
-    };
-    this.ctx.addVisitor = (visitor) => {
-      const { type, handler } = visitor;
-      type.forEach((v) => {
-        if (!this.ctx.visitors[v]) {
-          this.ctx.visitors[v] = [];
-        }
-        if (!this.ctx.visitors[v].includes(handler)) {
-          this.ctx.visitors[v].push(handler);
-        }
-      });
-    };
-  }
-
   protected async initCommandConfigs() {
     await this.loadCommandConfigFile(); // 加载 command config文件
     await this.resolveCommandConfig(); // 解析 command config
@@ -199,18 +145,17 @@ export default abstract class BaseHandler {
   constructor(protected ctx: Context) {
     this.ctx.logger.log(`Class Entity Created!`);
     this.pkgJson = getWkPkgJson();
-    this.extendContext();
   }
 
   async handler(fileUrl: string, path?: string) {
-    const { visitors, current, configs } = this.ctx;
+    const { visitors, current, configs, parsers, generate } = this.ctx;
     const { handled, pending } = current;
     this.ctx.addR_Pending(fileUrl);
 
     while (pending.length) {
       fileUrl = pending.shift();
       if (!fileUrl || handled.has(fileUrl)) continue;
-      // this.ctx.logger.log(fileUrl);
+      this.ctx.logger.log(fileUrl);
 
       const { type } = this.ctx.setR_Now(fileUrl, path);
       switch (type) {
@@ -218,20 +163,22 @@ export default abstract class BaseHandler {
         case FileType.Less:
         case FileType.Scss:
           {
-            const parser = new StyleParser(this.ctx, { type });
+            const parser = new parsers.style(this.ctx, { type });
             await parser.traverse(visitors[type]);
           }
           break;
         case FileType.Js:
         case FileType.Ts:
           {
-            const parser = new JsParser(this.ctx, { type });
+            const parser = new parsers.js(this.ctx, { type });
             visitors[type].forEach((visitor) => parser.traverse(visitor));
           }
           break;
         case FileType.Vue:
           if (configs.frames?.vue2) {
-            await new Vue2Parser(this.ctx, fileUrl).setup();
+            const parser = new parsers.vue2(this.ctx, fileUrl);
+            await parser.setup();
+            if (generate) await parser.generate();
           }
           break;
 
