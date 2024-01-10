@@ -1,7 +1,7 @@
 import * as t from '@babel/types';
 import { getAbsUrlInAst } from '../../utils/index.js';
 import type { Visitor } from '@babel/core';
-import type { Ctx } from '../interface.js';
+import type { Ctx } from '../../types/find.js';
 import type JsParser from '../../core/bases/parsers/js.js';
 
 export default (search: string) => (ctx: Ctx, parser: JsParser) => {

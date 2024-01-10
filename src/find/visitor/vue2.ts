@@ -1,6 +1,6 @@
 import { MatchHandlerType } from '../../types/constant.js';
 import type { Visitor } from 'vue-template-compiler';
-import type { Ctx } from '../interface.js';
+import type { Ctx } from '../../types/find.js';
 
 export default (search: string) => (ctx: Ctx) => {
   const mul = search.split(',');

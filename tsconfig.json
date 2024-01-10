@@ -22,6 +22,8 @@
     "strictNullChecks": false,
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "experimentalDecorators": true, // 启用装饰器
+    "emitDecoratorMetadata": true, // 为装饰器提供元数据的支持
   },
   "include": [
     "src/**/*",

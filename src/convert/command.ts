@@ -2,9 +2,9 @@ import { Command, Option } from 'clipanion';
 import StyleHandler from './style/index.js';
 import BaseCommand from '../core/bases/command.js';
 import { CommandKey } from '../types/constant.js';
-import type { Ctx as StyleCtx } from './style/interface.js';
+import type { Style } from '../types/convert.js';
 
-export default class ConvertCommand extends BaseCommand<StyleCtx> {
+export default class ConvertCommand extends BaseCommand<Style.Ctx> {
   static paths = [[`convert`]];
 
   static usage = Command.Usage({
@@ -23,7 +23,9 @@ export default class ConvertCommand extends BaseCommand<StyleCtx> {
   });
 
   async execute() {
-    this.setup(CommandKey.ConvertStyle);
-    new StyleHandler(this.context as StyleCtx).setup(); // 执行逻辑
+    if (this.style) {
+      this.setup(CommandKey.ConvertStyle);
+      new StyleHandler(this.context as Style.Ctx).setup(); // 执行逻辑
+    }
   }
 }

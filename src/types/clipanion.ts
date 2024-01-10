@@ -23,7 +23,7 @@ export interface Context extends BaseContext {
   appeared: Set<string>; // 已经处理过的文件
   current: Current; // 当前路由的相关信息
   visitors: ResolvedVisitor; // 逻辑处理
-  configs: ResolvedConfigs & { handlers: MatchHandler[] };
+  configs: ResolvedConfigs & { handlers: MatchHandler[] }; // 公共配置
 
   addRoute: (fileUrl: string, path?: string, extra?: AnyObj) => void; // 新增路由
   addVisitor: (visitor: Visitor) => void; // 新增处理逻辑

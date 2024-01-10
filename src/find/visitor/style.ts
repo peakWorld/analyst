@@ -1,6 +1,6 @@
 import { clearQuotes, getAbsUrlInAst } from '../../utils/index.js';
 import type { PluginCreator, ProcessOptions } from 'postcss';
-import type { Ctx } from '../interface.js';
+import type { Ctx } from '../../types/find.js';
 import type StyleParser from '../../core/bases/parsers/style.js';
 
 export default (search: string) => (ctx: Ctx, parser: StyleParser) => {

@@ -33,9 +33,7 @@ export default abstract class BaseHandler {
   private async loadCommandConfigFile() {
     this.ctx.logger.log(`Loading Command Configs!`);
     // 读取项目相关配置
-    const sourceUrl = getAbsByRelative(
-      `.cache/${this.ctx.key.toLowerCase()}.ts`,
-    );
+    const sourceUrl = getAbsByRelative(`.himly.ts`);
     const destUrl = getAbsByRelative(`.cache/${wkName}.ts`, space);
     const templateUrl = getAbsByRelative(`.cache/template.ts`, space);
 
@@ -182,6 +180,20 @@ export default abstract class BaseHandler {
   protected async initCommandConfigs() {
     await this.loadCommandConfigFile(); // 加载 command config文件
     await this.resolveCommandConfig(); // 解析 command config
+  }
+
+  protected async handleEntries() {
+    const { entry: entries } = this.ctx.configs;
+    for (let entry of entries) {
+      await this.handler(entry, entry);
+    }
+  }
+
+  protected async handleRoutes() {
+    const { routes } = this.ctx.configs;
+    for (let route of routes) {
+      await this.handler(route.fileUrl, route.path);
+    }
   }
 
   constructor(protected ctx: Context) {

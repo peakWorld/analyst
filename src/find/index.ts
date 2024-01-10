@@ -3,7 +3,7 @@ import jtsVisitor from './visitor/jts.js';
 import styleVisitor from './visitor/style.js';
 import vue2Visitor from './visitor/vue2.js';
 import { FileType } from '../types/constant.js';
-import { Ctx } from './interface.js';
+import { Ctx } from '../types/find.js';
 
 export default class FindHandler extends BaseHandler {
   private result = new Set<string>();
@@ -47,19 +47,5 @@ export default class FindHandler extends BaseHandler {
       type: [FileType.Vue],
       handler: vue2Visitor(this.text),
     });
-  }
-
-  async handleEntries() {
-    const { entry: entries } = this.ctx.configs;
-    for (let entry of entries) {
-      await this.handler(entry, entry);
-    }
-  }
-
-  async handleRoutes() {
-    const { routes } = this.ctx.configs;
-    for (let route of routes) {
-      await this.handler(route.fileUrl, route.path);
-    }
   }
 }

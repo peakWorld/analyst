@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import 'reflect-metadata';
 
 import { Cli, Builtins } from 'clipanion';
 import GitCommand from './git/command.js';
