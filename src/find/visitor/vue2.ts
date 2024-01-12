@@ -18,34 +18,33 @@ export default (search: string) => (ctx: Ctx) => {
           if (match.test(tag)) {
             const matches = match.exec(tag);
             const url = handler(matches[1]);
-            ctx.addR_Pending(url);
+            ctx.addA_Pending(url);
           }
         });
       }
 
-      if (mul.find((it) => tag.includes(it))) {
-        return ctx.addFind_Result();
-      }
-      const isAttrExit = mul.find((it) => {
-        return attrsList.some(
-          ({ name, value }) => name.includes(it) || value.includes(it),
-        );
+      mul.forEach((it) => {
+        if (
+          tag.includes(it) ||
+          attrsList.some(
+            ({ name, value }) => name.includes(it) || value.includes(it),
+          )
+        ) {
+          ctx.addFind_Result(it);
+        }
       });
-      if (isAttrExit) {
-        return ctx.addFind_Result();
-      }
     },
     Text(node) {
       const { text } = node;
-      if (mul.find((it) => text.includes(it))) {
-        return ctx.addFind_Result();
-      }
+      mul.forEach((it) => {
+        if (text.includes(it)) ctx.addFind_Result(it);
+      });
     },
     Expression(node) {
       const { text } = node;
-      if (mul.find((it) => text.includes(it))) {
-        return ctx.addFind_Result();
-      }
+      mul.forEach((it) => {
+        if (text.includes(it)) ctx.addFind_Result(it);
+      });
     },
   };
   return visitor;

@@ -15,8 +15,8 @@ const BASE_OPTIONS: ParserOptions = {
 
 export interface JsParserConfigs {
   type: FileType;
-  code: string;
-  options: ParserOptions;
+  code?: string;
+  options?: ParserOptions;
 }
 
 export type JsVisitor = Visitor | ((ctx: Context, parser: JsParser) => Visitor);
@@ -26,21 +26,21 @@ export default class JsParser {
 
   source!: string;
 
-  constructor(
-    protected ctx: Context,
-    protected options?: Partial<JsParserConfigs>,
-  ) {
-    let sourceCode = options?.code;
+  originalOptions!: JsParserConfigs;
+
+  constructor(protected ctx: Context, options: JsParserConfigs) {
+    let sourceCode = options.code;
     if (!sourceCode) {
       sourceCode = fs.readFileSync(ctx.current.processing).toString();
     }
     this.source = sourceCode;
+    this.originalOptions = options;
     this.parse();
   }
 
   mergeOptions() {
     // TODO 根据文件类型区分参数
-    return _.merge({}, BASE_OPTIONS, this.options?.options ?? {});
+    return _.merge({}, BASE_OPTIONS, this.originalOptions.options ?? {});
   }
 
   traverse(visitor: JsVisitor) {
@@ -54,6 +54,9 @@ export default class JsParser {
   }
 
   generateCode(options?: GeneratorOptions) {
-    return generate.default(this.ast, options);
+    const result = generate.default(this.ast, options);
+    return result;
   }
+
+  async generate() {}
 }

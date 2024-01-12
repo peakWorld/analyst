@@ -17,7 +17,7 @@ export default (ctx: Context) => {
           if (match.test(tag)) {
             const matches = match.exec(tag);
             const url = handler(matches[1]);
-            ctx.addR_Pending(url);
+            ctx.addA_Pending(url);
           }
         });
       }

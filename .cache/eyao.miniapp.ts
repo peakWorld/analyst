@@ -19,6 +19,7 @@ export default (ctx) => {
     // 命令行特定配置
     convert: {
       style: {
+        from: ['less'],
         to: 'scss'
       },
     },

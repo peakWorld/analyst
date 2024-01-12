@@ -10,7 +10,7 @@ export default (ctx: Context) => {
       import(rule) {
         if (!rule.params) return;
         const urls = getAbsUrlInAst(ctx, clearQuotes(rule.params), true);
-        urls.forEach((url) => ctx.addR_Pending(url));
+        urls.forEach((url) => ctx.addA_Pending(url));
       },
     },
   });

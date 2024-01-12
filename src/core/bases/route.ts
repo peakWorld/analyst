@@ -5,7 +5,7 @@ import type { FileType } from '../../types/constant.js';
 
 export type RouteContext = Omit<
   Context,
-  'configs' | 'addRoute' | 'setR_Now' | 'addR_Pending'
+  'configs' | 'addA_Route' | 'setA_Current' | 'addA_Pending'
 >;
 
 export default abstract class BaseRoute {

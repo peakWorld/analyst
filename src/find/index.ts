@@ -6,35 +6,28 @@ import { FileType } from '../types/constant.js';
 import { Ctx } from '../types/find.js';
 
 export default class FindHandler extends BaseHandler {
-  private result = new Set<string>();
+  private result = new Map<string, Set<string>>();
 
   constructor(protected ctx: Ctx, private text: string) {
     super(ctx);
-    this.extendCtx();
-    this.setVisitors();
+    this.expandCtxInInit();
   }
 
-  async setup() {
-    if (!this.text) throw new Error('查询条件为空!');
-
-    await this.initCommandConfigs();
-    // await this.handleEntries();
-    await this.handleRoutes();
-
-    console.log('result', this.result);
-  }
-
-  async extendCtx() {
-    this.ctx.addFind_Result = () => {
+  expandCtxInInit() {
+    this.ctx.addFind_Result = (k) => {
       const { current } = this.ctx;
-      if (current.path) {
-        this.result.add(current.path);
-        this.ctx.restR_Current();
-      }
-    };
-  }
+      if (!current.path) return;
 
-  async setVisitors() {
+      if (!this.result.has(k)) {
+        const set = new Set([current.path]);
+        this.result.set(k, set);
+      } else {
+        const set = this.result.get(k);
+        set.add(current.path);
+      }
+      this.ctx.restA_Current();
+    };
+
     this.ctx.addVisitor({
       type: [FileType.Css, FileType.Less, FileType.Scss],
       handler: styleVisitor(this.text),
@@ -47,5 +40,15 @@ export default class FindHandler extends BaseHandler {
       type: [FileType.Vue],
       handler: vue2Visitor(this.text),
     });
+  }
+
+  async setup() {
+    if (!this.text) throw new Error('查询条件为空!');
+
+    await this.initCommandConfigs();
+    // await this.handleEntries();
+    await this.handleRoutes();
+
+    console.log('result', this.result);
   }
 }

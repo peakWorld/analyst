@@ -15,6 +15,7 @@ export interface SableConfigs {
   // 命令行专属配置
   convert?: {
     style?: {
+      from: FileType[];
       to: FileType;
     };
   };

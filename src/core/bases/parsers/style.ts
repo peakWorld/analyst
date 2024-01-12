@@ -11,8 +11,8 @@ const BASE_OPTIONS: ProcessOptions = {
 
 export interface StyleParserConfigs {
   type: FileType;
-  code: string;
-  options: ProcessOptions;
+  code?: string;
+  options?: ProcessOptions;
 }
 
 export type PluginCb = (
@@ -24,24 +24,29 @@ export type StyleVisitor = PluginCb | PluginCreator<ProcessOptions>;
 export default class StyleParser {
   private processor!: Processor;
 
+  private result!: postcss.Result<postcss.Document | postcss.Root>;
+
   source!: string;
 
-  constructor(
-    protected ctx: Context,
-    protected options?: Partial<StyleParserConfigs>,
-  ) {
-    let sourceCode = options?.code;
+  originalOptions!: StyleParserConfigs;
+
+  constructor(protected ctx: Context, options: StyleParserConfigs) {
+    let sourceCode = options.code;
     if (!sourceCode) {
       sourceCode = fs.readFileSync(ctx.current.processing).toString();
     }
     this.source = sourceCode;
+    this.originalOptions = options;
     this.processor = postcss();
   }
 
   async mergeOptions() {
-    const options = { ...BASE_OPTIONS };
+    const options = {
+      ...BASE_OPTIONS,
+      ...(this.originalOptions.options ?? {}),
+    };
     let syntax = null;
-    switch (this.options?.type) {
+    switch (this.originalOptions.type) {
       case FileType.Less:
         syntax = (await import('postcss-less')).default;
         break;
@@ -72,10 +77,16 @@ export default class StyleParser {
         }
       });
     }
-    await this.processor.process(this.source, options);
+    this.result = await this.processor.process(this.source, options);
   }
 
   async generateCode() {
-    return '';
+    return this.result.css;
+  }
+
+  async generate() {
+    const code = await this.generateCode();
+    // TODO 格式化
+    await fs.outputFile(this.ctx.current.processing, code);
   }
 }

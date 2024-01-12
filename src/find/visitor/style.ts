@@ -8,9 +8,9 @@ export default (search: string) => (ctx: Ctx, parser: StyleParser) => {
   const plugin: PluginCreator<ProcessOptions> = () => ({
     postcssPlugin: 'postcss-find',
     OnceExit() {
-      if (mul.find((it) => parser.source.includes(it))) {
-        return ctx.addFind_Result();
-      }
+      mul.forEach((it) => {
+        if (parser.source.includes(it)) ctx.addFind_Result(it);
+      });
     },
   });
   plugin.postcss = true;

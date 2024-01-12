@@ -13,7 +13,7 @@ export default (ctx: Context) => {
         node.arguments?.forEach((it) => {
           if (t.isStringLiteral(it)) {
             const urls = getAbsUrlInAst(ctx, it.value);
-            urls.forEach((url) => ctx.addR_Pending(url));
+            urls.forEach((url) => ctx.addA_Pending(url));
           }
         });
       }
@@ -21,7 +21,7 @@ export default (ctx: Context) => {
     ImportDeclaration({ node }) {
       if (t.isStringLiteral(node.source)) {
         const urls = getAbsUrlInAst(ctx, node.source.value);
-        urls.forEach((url) => ctx.addR_Pending(url));
+        urls.forEach((url) => ctx.addA_Pending(url));
       }
     },
   };

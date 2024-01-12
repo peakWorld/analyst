@@ -1,15 +1,53 @@
+import { getAbsUrlInAst } from '../../../utils/index.js';
+import { FileType } from '../../../types/constant.js';
 import type { Style } from '../../../types/convert.js';
 import type compiler from 'vue-template-compiler';
-import { saveDataToTmpJsonFile } from '../../../utils/index.js';
 
-export default (ctx: Style.Ctx) => {
-  const { parsers } = ctx;
+export default async (ctx: Style.Ctx) => {
+  const { parsers, toFrame, visitors } = ctx;
 
   class Vue2 extends parsers.vue2 {
     protected async parseStyle(styles: compiler.SFCBlock[]) {
-      // console.log('parseStyle', this.ctx.current.processing, styles);
+      const result = [];
+      for (let style of styles) {
+        const { content, lang, src, scoped } = style;
+        const tmpStyle = { lang, scoped, src, content };
+
+        if (!lang || lang === FileType.Css) {
+          result.push(tmpStyle);
+          continue;
+        }
+
+        if (lang !== toFrame) ctx.shouldGen = true;
+
+        if (src) {
+          const urls = getAbsUrlInAst(ctx, src);
+          urls.forEach((url) => ctx.addA_Pending(url));
+          if (lang != toFrame) {
+            tmpStyle.lang = toFrame;
+            tmpStyle.src = src.replace(`.${lang}`, `.${toFrame}`);
+          }
+        }
+        if (content) {
+          const parser = new parsers.style(ctx, {
+            type: lang as FileType,
+            code: content,
+          });
+          await parser.traverse(visitors[lang]);
+          if (lang != toFrame) {
+            tmpStyle.lang = toFrame;
+            tmpStyle.content = await parser.generateCode();
+          }
+        }
+        result.push(tmpStyle);
+      }
       // saveDataToTmpJsonFile({ styles }, 'styles');
-      return styles;
+      return result;
+    }
+
+    async generate() {
+      super.generate();
+      ctx.shouldGen = false;
     }
   }
 

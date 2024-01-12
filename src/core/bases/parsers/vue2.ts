@@ -1,8 +1,7 @@
-import path from 'node:path';
 import fs from 'fs-extra';
 import compiler from 'vue-template-compiler';
 import { FileType } from '../../../types/constant.js';
-import { getAbsByRelative, t } from '../../../utils/index.js';
+import { getAbsUrlInAst, t } from '../../../utils/index.js';
 import type { Context } from '../../../types/clipanion.js';
 import type { Visitor, Ctx, Node } from 'vue-template-compiler';
 
@@ -60,15 +59,15 @@ export default class Vue2Parser {
   }
 
   protected parseScript(content: string) {
-    const { visitors, configs, parsers, generate } = this.ctx;
+    const { visitors, configs, parsers, needA_Gen } = this.ctx;
     const type = configs.frames?.ts ? FileType.Ts : FileType.Js;
     const parser = new parsers.js(this.ctx, { type, code: content });
     visitors[type].forEach((visitor) => parser.traverse(visitor));
-    return generate ? parser.generateCode().code : '';
+    return needA_Gen(FileType.Vue) ? parser.generateCode().code : '';
   }
 
   protected async parseStyle(styles: compiler.SFCBlock[]) {
-    const { visitors, parsers, generate } = this.ctx;
+    const { visitors, parsers, needA_Gen } = this.ctx;
     // 未设置lang属性的style标签, 默认为Css
     // 如果同一个文件中有些设置了lang、有些没有设置lang, 则以同文件内的lang为准
     let tmpType = FileType.Css;
@@ -80,18 +79,17 @@ export default class Vue2Parser {
 
     let result = [];
     for (let style of styles) {
-      const { lang, content, src } = style;
+      const { lang, content, src, scoped } = style;
+      const tmpStyle = { lang, src, content, scoped };
       const type = (lang ?? tmpType) as FileType.Css; // TODO 类型断言
-      const tmpStyle = { lang, src, content: '' };
       if (src) {
-        this.ctx.addR_Pending(
-          getAbsByRelative(src, path.dirname(this.ctx.current.processing)),
-        );
+        const urls = getAbsUrlInAst(this.ctx, src);
+        urls.forEach((url) => this.ctx.addA_Pending(url));
       }
       if (content) {
         const parser = new parsers.style(this.ctx, { type, code: content });
         await parser.traverse(visitors[type]);
-        if (generate) {
+        if (needA_Gen(FileType.Vue)) {
           tmpStyle.content = await parser.generateCode();
         }
       }
@@ -106,14 +104,14 @@ export default class Vue2Parser {
     const code = fs.readFileSync(this.fileUrl).toString();
     const { template, script, styles } = compiler.parseComponent(code);
 
-    if (template?.content) {
-      this.contents.template = this.parseTemplate(template.content);
+    if (styles?.length) {
+      this.contents.styles = await this.parseStyle(styles);
     }
     if (script?.content) {
       this.contents.script = this.parseScript(script.content);
     }
-    if (styles?.length) {
-      this.contents.styles = await this.parseStyle(styles);
+    if (template?.content) {
+      this.contents.template = this.parseTemplate(template.content);
     }
   }
 
@@ -135,7 +133,28 @@ export default class Vue2Parser {
     this.traverse(this.ast, v, ctx);
   }
 
+  async generateCode() {
+    const { template, script, styles } = this.contents;
+    let result = '';
+    if (template) result += `<template>${template}</template>\n`;
+    if (script) result += `<script>\n${script}\n</script>\n`;
+    styles?.forEach((style) => {
+      const { content, lang, src, scoped } = style;
+      let text = `<style`;
+      if (scoped) text += ' scoped';
+      if (lang) text += ` lang='${lang}'`;
+      if (src) text += ` src='${src}'`;
+      text += '>';
+      if (content) text += `${content}`;
+      text += '</style>\n';
+      result += text;
+    });
+    return result;
+  }
+
   async generate() {
-    // console.log('vue2', this.contents);
+    const code = await this.generateCode();
+    // TODO eslint格式化
+    await fs.outputFile(this.ctx.current.processing, code);
   }
 }

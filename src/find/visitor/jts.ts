@@ -9,9 +9,9 @@ export default (search: string) => (ctx: Ctx, parser: JsParser) => {
   const visitor: Visitor = {
     exit({ node }) {
       if (t.isProgram(node)) {
-        if (mul.find((it) => parser.source.includes(it))) {
-          return ctx.addFind_Result();
-        }
+        mul.forEach((it) => {
+          if (parser.source.includes(it)) ctx.addFind_Result(it);
+        });
       }
     },
   };

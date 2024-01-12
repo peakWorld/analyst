@@ -148,16 +148,25 @@ export default class BaseHandler {
   }
 
   async handler(fileUrl: string, path?: string) {
-    const { visitors, current, configs, parsers, generate } = this.ctx;
+    const {
+      visitors,
+      current,
+      configs,
+      parsers,
+      needA_Gen,
+      needA_Parse,
+      addA_Pending,
+      setA_Current,
+    } = this.ctx;
     const { handled, pending } = current;
-    this.ctx.addR_Pending(fileUrl);
+    addA_Pending(fileUrl);
 
     while (pending.length) {
       fileUrl = pending.shift();
-      if (!fileUrl || handled.has(fileUrl)) continue;
+      if (!fileUrl || handled.has(fileUrl) || !needA_Parse(fileUrl)) continue;
       this.ctx.logger.log(fileUrl);
 
-      const { type } = this.ctx.setR_Now(fileUrl, path);
+      const { type } = setA_Current(fileUrl, path);
       switch (type) {
         case FileType.Css:
         case FileType.Less:
@@ -165,6 +174,7 @@ export default class BaseHandler {
           {
             const parser = new parsers.style(this.ctx, { type });
             await parser.traverse(visitors[type]);
+            if (needA_Gen(type)) await parser.generate();
           }
           break;
         case FileType.Js:
@@ -172,13 +182,14 @@ export default class BaseHandler {
           {
             const parser = new parsers.js(this.ctx, { type });
             visitors[type].forEach((visitor) => parser.traverse(visitor));
+            if (needA_Gen(type)) await parser.generate();
           }
           break;
         case FileType.Vue:
           if (configs.frames?.vue2) {
             const parser = new parsers.vue2(this.ctx, fileUrl);
             await parser.setup();
-            if (generate) await parser.generate();
+            if (needA_Gen(type)) await parser.generate();
           }
           break;
 
@@ -187,6 +198,6 @@ export default class BaseHandler {
       }
     }
 
-    this.ctx.restR_Current();
+    this.ctx.restA_Current();
   }
 }

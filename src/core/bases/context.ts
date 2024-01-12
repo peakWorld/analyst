@@ -12,7 +12,7 @@ import type BaseHandler from './handler.js';
 
 export const expand = (target: { new (...args: any[]): BaseHandler }) => {
   return class extends target {
-    private expandBaseCtx() {
+    private expandBaseCtxInInit() {
       this.ctx.appeared = new Set();
       this.ctx.current = {
         processing: '',
@@ -23,12 +23,14 @@ export const expand = (target: { new (...args: any[]): BaseHandler }) => {
       };
       this.ctx.visitors = {} as ResolvedVisitor;
 
-      this.currentRoute();
+      this.base();
+      this.visitor();
       this.ctxParser();
     }
 
-    private currentRoute() {
-      this.ctx.setR_Now = (fileUrl, path) => {
+    // 这些Ctx方法, 在循环逻辑中使用 A => After
+    private base() {
+      this.ctx.setA_Current = (fileUrl, path) => {
         this.ctx.appeared.add(fileUrl);
         this.ctx.current.handled.add(fileUrl);
         this.ctx.current.processing = fileUrl;
@@ -36,21 +38,27 @@ export const expand = (target: { new (...args: any[]): BaseHandler }) => {
         this.ctx.current.path = path;
         return this.ctx.current;
       };
-      this.ctx.addR_Pending = (fileUrl) => {
+      this.ctx.addA_Pending = (fileUrl) => {
         const { pending } = this.ctx.current;
         if (pending.includes(fileUrl)) return;
         this.ctx.current.pending.push(fileUrl);
       };
-      this.ctx.restR_Current = () => {
+      this.ctx.restA_Current = () => {
         this.ctx.current.handled.clear();
         this.ctx.current.pending.length = 0;
         this.ctx.current.path = '';
         this.ctx.current.processing = '';
       };
-      this.ctx.addRoute = (fileUrl: string, path?: string, extra?: AnyObj) => {
+      this.ctx.addA_Route = (
+        fileUrl: string,
+        path?: string,
+        extra?: AnyObj,
+      ) => {
         const route = setRoute(fileUrl, path, extra);
         this.ctx.configs.routes.push(route);
       };
+      this.ctx.needA_Gen = () => false;
+      this.ctx.needA_Parse = () => true;
     }
 
     private ctxParser() {
@@ -61,7 +69,7 @@ export const expand = (target: { new (...args: any[]): BaseHandler }) => {
       };
     }
 
-    private expandVisitor() {
+    private visitor() {
       this.ctx.addVisitor = (visitor) => {
         const { type, handler } = visitor;
         type.forEach((v) => {
@@ -73,20 +81,18 @@ export const expand = (target: { new (...args: any[]): BaseHandler }) => {
           }
         });
       };
-
       this.ctx.addVisitor({
         type: [FileType.Css, FileType.Less, FileType.Scss],
         handler: styleBaseVisitor,
       });
-
       this.ctx.addVisitor({
         type: [FileType.Js, FileType.Ts],
         handler: jstBaseVisitor,
       });
     }
 
-    // 必须等configs解析完成后, 按照配置设置
-    private expandVistorAfterConfigs() {
+    // 必须等configs解析完成后, 按照配置更新Ctx
+    private expandCtxAfterLoadedConfigs() {
       if (this.ctx.configs.frames.vue2) {
         this.ctx.addVisitor({
           type: [FileType.Vue],
@@ -97,13 +103,12 @@ export const expand = (target: { new (...args: any[]): BaseHandler }) => {
 
     protected async initCommandConfigs() {
       await super.initCommandConfigs();
-      this.expandVistorAfterConfigs();
+      this.expandCtxAfterLoadedConfigs();
     }
 
     constructor(ctx: Context) {
       super(ctx);
-      this.expandBaseCtx();
-      this.expandVisitor();
+      this.expandBaseCtxInInit();
     }
   };
 };

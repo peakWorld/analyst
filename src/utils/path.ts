@@ -151,7 +151,7 @@ export function isInRelative(url: string) {
 /**
  * 将别名或相对路径 转成绝对路径
  *
- * @/xx | ../xx => /../xx
+ * @/xx/x[.js] | ../xx[.js] => /../xx.js
  */
 export function getAbsUrlInAst(ctx: Context, fileUrl: string, inStyle = false) {
   let urls = [];

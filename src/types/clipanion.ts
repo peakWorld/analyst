@@ -34,12 +34,13 @@ export interface Context extends BaseContext {
   visitors: ResolvedVisitor; // 逻辑处理
   configs: ResolvedConfigs & { handlers: MatchHandler[] }; // 公共配置
   parsers: Parsers; // 解析器
-  generate: boolean; // 是否重新生成文件
 
-  addRoute: (fileUrl: string, path?: string, extra?: AnyObj) => void; // 新增路由
+  addA_Route: (fileUrl: string, path?: string, extra?: AnyObj) => void; // 新增路由
+  setA_Current: (fileUrl: string, path?: string) => Current; // 当前路由: 正在｜已经 处理文件
+  addA_Pending: (fileUrl: string) => void; // 当前路由: 将要 处理文件
+  restA_Current: () => void; // 当前路由: 重置
+  needA_Gen: (type?: FileType) => boolean; // 是否需要生成文件
+  needA_Parse: (fileUrl?: string) => boolean; // 是否需要解析文件
+
   addVisitor: (visitor: Visitor) => void; // 新增处理逻辑
-  setR_Now: (fileUrl: string, path?: string) => Current; // 当前路由: 正在｜已经 处理文件
-  addR_Pending: (fileUrl: string) => void; // 当前路由: 将要 处理文件
-  restR_Current: () => void; // 当前路由: 重置
-  // getR_Processing: () => string; // 当前路由: 获取正在处理中文件
 }
