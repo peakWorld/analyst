@@ -29,3 +29,13 @@ export default class ConvertCommand extends BaseCommand<Style.Ctx> {
     }
   }
 }
+
+if (process.env.NODE_ENV === 'debug') {
+  (async () => {
+    const instance = new ConvertCommand();
+    instance.context = {} as any;
+    instance.verbose = false;
+    instance.style = true;
+    instance.execute();
+  })();
+}

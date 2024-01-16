@@ -14,10 +14,10 @@ export default class StyleHandler extends BaseHandler {
   expandCtxInInit() {
     this.ctx.shouldGen = false;
 
-    // this.ctx.addVisitor({
-    //   type: [FileType.Less],
-    //   handler: lessVisitor,
-    // });
+    this.ctx.addVisitor({
+      type: [FileType.Less],
+      handler: lessVisitor,
+    });
 
     this.ctx.addVisitor({
       type: [FileType.Scss],
@@ -30,15 +30,17 @@ export default class StyleHandler extends BaseHandler {
     await this.expandConfig();
 
     this.ctx.configs.entry = [
-      '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/components/InputBar.vue',
+      // '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/components/InputBar.vue',
       // '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/index.vue',
+      '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/styles/inputbar.less',
+      // '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/styles/inputbar.scss',
     ];
     await this.handleEntries();
   }
 
   async expandConfig() {
     if (!this.commandConfigs?.convert?.style)
-      throw new Error('未配置转换来源和目标文件类型');
+      throw new Error('未配置转换文件类型, 来源和目标');
 
     const { to, from } = this.commandConfigs.convert.style;
     this.ctx.toFrame = to;
@@ -57,3 +59,6 @@ export default class StyleHandler extends BaseHandler {
     reParsers(this.ctx);
   }
 }
+
+// TODO
+// 1. 正则匹配文件 处理

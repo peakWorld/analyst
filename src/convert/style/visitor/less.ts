@@ -1,6 +1,7 @@
 import type { PluginCreator, ProcessOptions } from 'postcss';
 import type { Style } from '../../../types/convert.js';
 import type StyleParser from '../../../core/bases/parsers/style.js';
+import { saveDataToTmpJsonFile } from '../../../utils/index.js';
 
 // 将less的专属规则转成scss规则
 export default (ctx: Style.Ctx, parser: StyleParser) => {
@@ -12,6 +13,12 @@ export default (ctx: Style.Ctx, parser: StyleParser) => {
       import(rule) {
         rule.params = rule.params.replace(`.${type}`, `.${ctx.toFrame}`);
       },
+      '*'(rule) {
+        console.log('atrule', rule.name);
+      },
+    },
+    Once(root) {
+      // saveDataToTmpJsonFile(root, 'root-less');
     },
   });
   plugin.postcss = true;
