@@ -1,7 +1,7 @@
 import BaseHandler from '../../core/bases/handler.js';
 import { FileType } from '../../types/constant.js';
 import lessVisitor from './visitor/less.js';
-import scssVisitor from './visitor/scss.js';
+// import scssVisitor from './visitor/scss.js';
 import reParsers from './rewrite/index.js';
 import type { Style } from '../../types/convert.js';
 
@@ -19,10 +19,10 @@ export default class StyleHandler extends BaseHandler {
       handler: lessVisitor,
     });
 
-    this.ctx.addVisitor({
-      type: [FileType.Scss],
-      handler: scssVisitor,
-    });
+    // this.ctx.addVisitor({
+    //   type: [FileType.Scss],
+    //   handler: scssVisitor,
+    // });
   }
 
   async setup() {

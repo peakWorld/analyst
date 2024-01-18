@@ -20,6 +20,10 @@ build/
 
 # Optional npm cache directory
 .npm
+.cache
+.tmp
+*.old
+*.back
 
 # Optional eslint cache
 .eslintcache
@@ -27,10 +31,4 @@ build/
 # Misc
 .DS_Store
 
-.tmp/
-.cache/
-*.old/
-
-*.back
 !.cache/template.ts
-
