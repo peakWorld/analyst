@@ -18,7 +18,7 @@ export default async (ctx: Style.Ctx) => {
           continue;
         }
 
-        if (lang !== toFrame) ctx.shouldGen = true;
+        if (lang !== toFrame) ctx.shouldVueGen = true;
 
         if (src) {
           const urls = getAbsUrlInAst(ctx, src);
@@ -47,7 +47,7 @@ export default async (ctx: Style.Ctx) => {
 
     async generate() {
       super.generate();
-      ctx.shouldGen = false;
+      ctx.shouldVueGen = false;
     }
   }
 

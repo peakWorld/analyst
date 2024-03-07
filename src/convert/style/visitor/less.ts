@@ -13,11 +13,8 @@ export default (ctx: Style.Ctx, parser: StyleParser) => {
       import(rule) {
         rule.params = rule.params.replace(`.${type}`, `.${ctx.toFrame}`);
       },
-      '*'(rule) {
-        console.log('atrule', rule.name);
-      },
     },
-    Once(root) {
+    Once() {
       // saveDataToTmpJsonFile(root, 'root-less');
     },
   });

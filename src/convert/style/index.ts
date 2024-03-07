@@ -12,7 +12,7 @@ export default class StyleHandler extends BaseHandler {
   }
 
   expandCtxInInit() {
-    this.ctx.shouldGen = false;
+    this.ctx.shouldVueGen = false;
 
     this.ctx.addVisitor({
       type: [FileType.Less],
@@ -48,7 +48,7 @@ export default class StyleHandler extends BaseHandler {
     this.ctx.needA_Gen = (type) => {
       if (!type) return false;
       if (from.includes(type)) return true;
-      if (type === FileType.Vue && this.ctx.shouldGen) return true;
+      if (type === FileType.Vue && this.ctx.shouldVueGen) return true;
       return false;
     };
 
