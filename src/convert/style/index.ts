@@ -3,10 +3,10 @@ import { FileType } from '../../types/constant.js';
 import lessVisitor from './visitor/less.js';
 // import scssVisitor from './visitor/scss.js';
 import reParsers from './rewrite/index.js';
-import type { Style } from '../../types/convert.js';
+import type { StyleCtx } from '../../types/convert.js';
 
 export default class StyleHandler extends BaseHandler {
-  constructor(protected ctx: Style.Ctx) {
+  constructor(protected ctx: StyleCtx) {
     super(ctx);
     this.expandCtxInInit();
   }
