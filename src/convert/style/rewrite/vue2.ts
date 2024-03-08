@@ -1,9 +1,9 @@
 import { getAbsUrlInAst } from '../../../utils/index.js';
 import { FileType } from '../../../types/constant.js';
-import type { Style } from '../../../types/convert.js';
+import type { StyleCtx } from '../../../types/convert.js';
 import type compiler from 'vue-template-compiler';
 
-export default async (ctx: Style.Ctx) => {
+export default async (ctx: StyleCtx) => {
   const { parsers, toFrame, visitors } = ctx;
 
   class Vue2 extends parsers.vue2 {

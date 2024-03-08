@@ -1,7 +1,7 @@
 import type { PluginCreator, ProcessOptions } from 'postcss';
 import type { StyleCtx } from '../../../types/convert.js';
 import type StyleParser from '../../../core/bases/parsers/style.js';
-import { saveDataToTmpJsonFile } from '../../../utils/index.js';
+// import { saveDataToTmpJsonFile } from '../../../utils/index.js';
 
 // 将less的专属规则转成scss规则
 export default (ctx: StyleCtx, parser: StyleParser) => {

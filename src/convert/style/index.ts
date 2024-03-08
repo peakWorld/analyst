@@ -32,7 +32,7 @@ export default class StyleHandler extends BaseHandler {
     this.ctx.configs.entry = [
       // '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/components/InputBar.vue',
       // '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/index.vue',
-      '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/styles/inputbar.less',
+      '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/inputbar.less',
       // '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/styles/inputbar.scss',
     ];
     await this.handleEntries();

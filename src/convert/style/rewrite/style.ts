@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
-import type { Style } from '../../../types/convert.js';
+import type { StyleCtx } from '../../../types/convert.js';
 
-export default async (ctx: Style.Ctx) => {
+export default async (ctx: StyleCtx) => {
   const { parsers, toFrame } = ctx;
 
   class Style extends parsers.style {
