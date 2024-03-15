@@ -2,7 +2,7 @@ import BaseHandler from '../../core/bases/handler.js';
 import { FileType } from '../../types/constant.js';
 import lessVisitor from './visitor/less.js';
 // import scssVisitor from './visitor/scss.js';
-import reParsers from './rewrite/index.js';
+import reParsers from './parser/index.js';
 import type { StyleCtx } from '../../types/convert.js';
 
 export default class StyleHandler extends BaseHandler {
@@ -13,6 +13,7 @@ export default class StyleHandler extends BaseHandler {
 
   expandCtxInInit() {
     this.ctx.shouldVueGen = false;
+    this.ctx.rules = { mixins: new Set() };
 
     this.ctx.addVisitor({
       type: [FileType.Less],
@@ -30,12 +31,13 @@ export default class StyleHandler extends BaseHandler {
     await this.expandConfig();
 
     this.ctx.configs.entry = [
-      // '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/components/InputBar.vue',
-      // '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/index.vue',
-      '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/inputbar.less',
-      // '/Users/windlliu/wk/eyao.miniapp/src/packageRobot/styles/inputbar.scss',
+      // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/index.vue',
+      '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/var/care-token.less',
+      // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/inputbar.less',
+      // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/var/mixins.less',
     ];
     await this.handleEntries();
+    // await this.handleRoutes();
   }
 
   async expandConfig() {

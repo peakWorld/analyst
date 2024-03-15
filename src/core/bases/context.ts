@@ -25,7 +25,7 @@ export const expand = (target: { new (...args: any[]): BaseHandler }) => {
 
       this.base();
       this.visitor();
-      this.ctxParser();
+      this.initParsers();
     }
 
     // 这些Ctx方法, 在循环逻辑中使用 A => After
@@ -61,7 +61,7 @@ export const expand = (target: { new (...args: any[]): BaseHandler }) => {
       this.ctx.needA_Parse = () => true;
     }
 
-    private ctxParser() {
+    private initParsers() {
       this.ctx.parsers = {
         vue2: Vue2Parser,
         style: StyleParser,

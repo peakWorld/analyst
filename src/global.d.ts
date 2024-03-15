@@ -1,4 +1,5 @@
 import debug from 'debug';
+// import type { AtRule } from 'postcss'
 
 declare global {
   type PickValue<T, K extends keyof T> = Pick<T, K>[K];
