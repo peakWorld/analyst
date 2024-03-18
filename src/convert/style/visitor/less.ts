@@ -48,9 +48,13 @@ export default (ctx: StyleCtx, parser: StyleParser) => {
       rule.selector = handleInterp(rule.selector);
 
       // 处理mixin语句
-      {
-        const match = /[.#](.*)\(/.exec(rule.selector);
-        if (match?.[1] && ctx.rules.mixins.has(match[1])) {
+      const match = /[.#](.*)[(\s]+/.exec(rule.selector);
+      if (match) {
+        const name = match?.[1];
+        if (
+          (name && ctx.rules.mixins.has(name)) || // 已调用的mixin => .a 或 .a() 这种格式
+          /\(.*\)/.test(rule.selector) // 未被调用的mixin => .a()
+        ) {
           const rules2 = new AtRule({
             name: 'mixin',
             params: rule.selector.slice(1).replace(/@/g, '$'),

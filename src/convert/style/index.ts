@@ -31,8 +31,9 @@ export default class StyleHandler extends BaseHandler {
     await this.expandConfig();
 
     this.ctx.configs.entry = [
-      // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/index.vue',
-      '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/var/care-token.less',
+      '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/index.vue',
+      // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/index.less',
+      // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/var/care-token.less',
       // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/inputbar.less',
       // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/var/mixins.less',
     ];
@@ -61,6 +62,3 @@ export default class StyleHandler extends BaseHandler {
     reParsers(this.ctx);
   }
 }
-
-// TODO
-// 1. 正则匹配文件 处理
