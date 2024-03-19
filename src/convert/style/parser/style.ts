@@ -9,10 +9,9 @@ export default async (ctx: StyleCtx) => {
       const { processing, type } = this.ctx.current;
       const fileUrl = processing.replace(`.${type}`, `.${toFrame}`);
       const code = await this.generateCode();
-      // TODO 格式化
       fs.ensureFileSync(fileUrl);
-      await fs.outputFile(fileUrl, code);
-      // fs.removeSync(processing)
+      fs.outputFileSync(fileUrl, code);
+      await this.stylintCodeByCommand(fileUrl);
     }
   }
 

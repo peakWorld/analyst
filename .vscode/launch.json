@@ -13,7 +13,7 @@
       ],
       "program": "${workspaceFolder}/build/src/convert/command.js", // 调试指定命令
       "runtimeExecutable": "/usr/local/bin/node",
-      "cwd": "/Users/windlliu/wk/eyao.miniapp", // 指定工作目录
+      "cwd": "/Users/windlliu/wk_pre/eyao.miniapp", // 指定工作目录
       "env": {
         "NODE_ENV": "debug"
       }

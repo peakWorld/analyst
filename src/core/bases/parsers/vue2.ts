@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process';
 import fs from 'fs-extra';
 import compiler from 'vue-template-compiler';
 import { FileType } from '../../../types/constant.js';
@@ -153,8 +154,16 @@ export default class Vue2Parser {
   }
 
   async generate() {
+    const { processing } = this.ctx.current;
     const code = await this.generateCode();
-    // TODO eslint格式化
-    await fs.outputFile(this.ctx.current.processing, code);
+    // TODO 格式化代码 => NODE API方式
+    fs.outputFileSync(processing, code);
+    await this.eslintCodeByCommand(processing);
+  }
+
+  async eslintCodeByCommand(fileUrl: string) {
+    // HACK 只使用eslint一直有问题
+    execSync(`npx prettier ${fileUrl} --write`);
+    execSync(`npx eslint --ext .vue --fix ${fileUrl}`);
   }
 }

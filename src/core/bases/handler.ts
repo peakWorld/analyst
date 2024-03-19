@@ -164,7 +164,7 @@ export default class BaseHandler {
     while (pending.length) {
       fileUrl = pending.shift();
       if (!fileUrl || handled.has(fileUrl) || !needA_Parse(fileUrl)) continue;
-      this.ctx.logger.log(fileUrl);
+      // this.ctx.logger.log(fileUrl);
 
       const { type } = setA_Current(fileUrl, path);
       switch (type) {

@@ -53,7 +53,8 @@ export default class JsParser {
     this.ast = parser.parse(this.source, options);
   }
 
-  generateCode(options?: GeneratorOptions) {
+  // retainLines 尽量保证行数一致
+  generateCode(options: GeneratorOptions = { retainLines: true }) {
     const result = generate.default(this.ast, options);
     return result;
   }
