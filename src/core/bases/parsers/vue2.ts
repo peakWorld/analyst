@@ -56,6 +56,7 @@ export default class Vue2Parser {
     this.source = template;
     this.parseDsl();
     visitors[FileType.Vue]?.forEach((visitor) => this.traverseDsl(visitor));
+    // template只能访问元素, 不支持修改
     return this.source;
   }
 
