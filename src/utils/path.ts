@@ -157,13 +157,16 @@ export function getAbsUrlInAst(ctx: Context, fileUrl: string, inStyle = false) {
   let urls = [];
   const { frames, alias } = ctx.configs;
 
+  // 根据框架获取匹配的文件后缀, 减少匹配次数
   const exts = inStyle
     ? getStyleFileTye(frames)
     : getMatchFileType(frames, true);
 
+  // 别名路径
   if (isInAlias(alias, fileUrl)) {
     urls = getAbsByMatchExts(getAbsByAlias(alias, fileUrl), exts);
   }
+  // 相对路径
   if (isInRelative(fileUrl)) {
     urls = getAbsByMatchExts(
       getAbsByRelative(fileUrl, path.dirname(ctx.current.processing)),

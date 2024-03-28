@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { execSync } from 'node:child_process';
 import _ from 'lodash';
 import {
   space,
@@ -25,7 +26,6 @@ export default class BaseHandler {
   protected pkgJson!: PackageJson;
 
   private async loadCommandConfigFile() {
-    this.ctx.logger.log(`Loading Command Configs!`);
     // 读取项目相关配置
     const sourceUrl = getAbsByRelative(`.himly.ts`);
     const destUrl = getAbsByRelative(`.cache/${wkName}.ts`, space);
@@ -33,10 +33,14 @@ export default class BaseHandler {
 
     // 如果项目不存在该配置文件, 将模板拷贝到当前项目
     if (!fs.existsSync(sourceUrl)) {
-      return fs.copySync(templateUrl, sourceUrl);
+      fs.copySync(templateUrl, sourceUrl);
+      this.ctx.logger.log(`Copied Template Config File => <.himly.ts>`);
+      process.exit(0); // 退出进程
     }
     // 如果项目存在该配置文件, 则缓存到.cache文件夹
     fs.copySync(sourceUrl, destUrl);
+
+    this.ctx.logger.log(`Loading Command Configs!`);
     // 读取该配置文件(必须esm)
     const getConfigs = await readFileToExcuteJs(sourceUrl);
     const configs = await (typeof getConfigs === 'function'
@@ -164,7 +168,7 @@ export default class BaseHandler {
     while (pending.length) {
       fileUrl = pending.shift();
       if (!fileUrl || handled.has(fileUrl) || !needA_Parse(fileUrl)) continue;
-      // this.ctx.logger.log(fileUrl);
+      this.ctx.logger.log(fileUrl);
 
       const { type } = setA_Current(fileUrl, path);
       switch (type) {
@@ -199,5 +203,16 @@ export default class BaseHandler {
     }
 
     this.ctx.restA_Current();
+  }
+
+  async formatterCode() {
+    const { formatting } = this.ctx;
+    if (!formatting.size) return;
+
+    this.ctx.logger.log(`Formatter Code!`);
+    // HACK 只使用eslint一直有问题
+    const fileUrls = Array.from(formatting).join(' ');
+    execSync(`npx prettier ${fileUrls} --write`);
+    execSync(`npx eslint --ext .vue --fix ${fileUrls}`);
   }
 }

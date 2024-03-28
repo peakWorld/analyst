@@ -34,6 +34,7 @@ export interface Context extends BaseContext {
   visitors: ResolvedVisitor; // 逻辑处理
   configs: ResolvedConfigs & { handlers: MatchHandler[] }; // 公共配置
   parsers: Parsers; // 解析器
+  formatting: Set<string>; // 等待格式化
 
   addA_Route: (fileUrl: string, path?: string, extra?: AnyObj) => void; // 新增路由
   setA_Current: (fileUrl: string, path?: string) => Current; // 当前路由: 正在｜已经 处理文件
@@ -41,6 +42,7 @@ export interface Context extends BaseContext {
   restA_Current: () => void; // 当前路由: 重置
   needA_Gen: (type?: FileType) => boolean; // 是否需要生成文件
   needA_Parse: (fileUrl?: string) => boolean; // 是否需要解析文件
+  addA_Formatting: (fileUrl?: string) => void; // 需要格式化文件
 
   addVisitor: (visitor: Visitor) => void; // 新增处理逻辑
 }

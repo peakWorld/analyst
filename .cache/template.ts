@@ -1,5 +1,6 @@
 export default () => {
   return {
+    /** 公共配置 */
     entry: [],
 
     // 路由处理 数组 [路由入口文件]; 对象 路由配置对象
@@ -15,7 +16,7 @@ export default () => {
     // 路径别名 TODO
     alias: {},
 
-    // 命令行特定配置
+    /** 特定配置 */
     convert: {
       style: {},
     },

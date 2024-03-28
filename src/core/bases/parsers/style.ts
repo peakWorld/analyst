@@ -85,13 +85,11 @@ export default class StyleParser {
   }
 
   async generate() {
-    const code = await this.generateCode();
-    fs.outputFileSync(this.ctx.current.processing, code);
-    await this.stylintCodeByCommand(this.ctx.current.processing);
-    // TODO 格式化
-  }
+    const { processing } = this.ctx.current;
 
-  async stylintCodeByCommand(fileUrl: string) {
-    console.log('wait stylint =>', fileUrl);
+    const code = await this.generateCode();
+    fs.outputFileSync(processing, code);
+
+    this.ctx.addA_Formatting(processing);
   }
 }

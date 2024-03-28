@@ -30,15 +30,18 @@ export default class StyleHandler extends BaseHandler {
     await this.initCommandConfigs();
     await this.expandConfig();
 
-    this.ctx.configs.entry = [
-      '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/index.vue',
-      // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/index.less',
-      // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/var/care-token.less',
-      // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/inputbar.less',
-      // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/var/mixins.less',
-    ];
+    // this.ctx.configs.entry = [
+    //   // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/index.vue',
+    //   // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/index.less',
+    //   // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/var/care-token.less',
+    //   // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/inputbar.less',
+    //   // '/Users/windlliu/wk_pre/eyao.miniapp/src/packageRobot/styles/var/mixins.less',
+    // ];
     await this.handleEntries();
-    // await this.handleRoutes();
+    await this.handleRoutes();
+    console.log('formatting', this.ctx.formatting);
+
+    await this.formatterCode();
   }
 
   async expandConfig() {

@@ -14,6 +14,7 @@ export const expand = (target: { new (...args: any[]): BaseHandler }) => {
   return class extends target {
     private expandBaseCtxInInit() {
       this.ctx.appeared = new Set();
+      this.ctx.formatting = new Set();
       this.ctx.current = {
         processing: '',
         path: '',
@@ -56,6 +57,9 @@ export const expand = (target: { new (...args: any[]): BaseHandler }) => {
       ) => {
         const route = setRoute(fileUrl, path, extra);
         this.ctx.configs.routes.push(route);
+      };
+      this.ctx.addA_Formatting = (fileUrl) => {
+        this.ctx.formatting.add(fileUrl);
       };
       this.ctx.needA_Gen = () => false;
       this.ctx.needA_Parse = () => true;

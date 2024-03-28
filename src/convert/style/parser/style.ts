@@ -11,7 +11,6 @@ export default async (ctx: StyleCtx) => {
       const code = await this.generateCode();
       fs.ensureFileSync(fileUrl);
       fs.outputFileSync(fileUrl, code);
-      await this.stylintCodeByCommand(fileUrl);
     }
   }
 
